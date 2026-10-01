@@ -34,7 +34,7 @@ export interface WatchedProjectItem {
 export interface WatchedAlertPreview {
   id: string;
   projectName: string;
-  changeType: 'Registration lapsed' | 'Penalty added' | 'Approval granted';
+  changeType: string;
   timestamp: string;
   channel: 'whatsapp' | 'email';
   contact: string;
@@ -150,7 +150,7 @@ export function WatchingView({
 
         {watchedProjects.length > 0 ? (
           <div className="divide-y divide-stone-200 rounded-xl border border-stone-200 bg-white overflow-hidden">
-            {watchedProjects.map(({ project, channel, contact, lastChecked, hasChanged, changeNote }) => (
+            {watchedProjects.map(({ project, channel, contact, lastChecked, hasChanged, changeNote, changeTimestamp }) => (
               <div
                 key={project.id}
                 className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-stone-50/70 transition-colors"
@@ -173,7 +173,7 @@ export function WatchingView({
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500">
                     <span className="flex items-center gap-1 text-stone-600">
                       <Clock className="w-3.5 h-3.5 text-stone-400" strokeWidth={1.5} />
-                      Last checked: {lastChecked}
+                      Last verified: {lastChecked}
                     </span>
                     <span>·</span>
                     <span>Alerts: {channel === 'whatsapp' ? 'WhatsApp' : 'Email'} ({contact})</span>
@@ -182,6 +182,7 @@ export function WatchingView({
                   {/* One-line status notice */}
                   <p className={`text-xs ${hasChanged ? 'text-amber-800 font-semibold' : 'text-stone-400'}`}>
                     {hasChanged ? changeNote : 'Nothing has changed'}
+                    {hasChanged && changeTimestamp ? <span className="font-mono text-[10px] uppercase tracking-wider text-[#585858] ml-1.5">· {changeTimestamp}</span> : null}
                   </p>
                 </div>
 

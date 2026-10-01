@@ -5,3 +5,7 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Local embedded database
+.data/
+*.tsbuildinfo

@@ -26,6 +26,47 @@ export interface ProjectSafetyItem {
   summary: string;
   whySummary: string;
   keyConcerns?: string[];
+
+  // Live statutory fields (populated from the database once records are pushed live)
+  developer?: string | null;
+  reraValidUntil?: string | null;
+  escrowAccount?: string | null;
+  lastQprFiled?: string | null;
+  permitNo?: string | null;
+  sanctionedFloors?: number | null;
+  sanctionedConfig?: string | null;
+  ocStatus?: string | null;
+  surveyNumbers?: string | null;
+  nearestLakeMeters?: number | null;
+  lastVerifiedAt?: string; // ISO timestamp
+  updatedAt?: string; // ISO timestamp
+  version?: number;
+}
+
+export interface MicroMarketLive extends MicroMarket {
+  guidelineRatePerSqFt?: number | null;
+  guidelineUpdatedAt?: string | null;
+}
+
+export interface ProjectAlertItem {
+  id: string;
+  projectId: string;
+  projectName: string;
+  date: string;
+  type: string;
+  whatChanged: string;
+  whatItMeans: string;
+  source?: string | null;
+  sourceUrl?: string | null;
+  publishedAt: string;
+}
+
+export interface LiveSnapshot {
+  projects: ProjectSafetyItem[];
+  markets: MicroMarketLive[];
+  alerts: ProjectAlertItem[];
+  version: string;
+  generatedAt: string;
 }
 
 export const MICRO_MARKETS: MicroMarket[] = [

@@ -21,7 +21,8 @@ import {
   Check,
   Trash2
 } from 'lucide-react';
-import { MOCK_PROJECTS, ProjectSafetyItem, JARGON_DICTIONARY } from '@/lib/mock-data';
+import { ProjectSafetyItem, JARGON_DICTIONARY } from '@/lib/mock-data';
+import { useLiveData } from '@/components/live/LiveDataProvider';
 import { JargonTooltip } from '@/components/JargonTooltip';
 import { ViewType } from '@/components/TopBar';
 
@@ -48,7 +49,10 @@ export function CheckView({
   const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [loadingStep, setLoadingStep] = useState<string>('');
-  const [selectedResult, setSelectedResult] = useState<ProjectSafetyItem | null>(null);
+  const { projects: liveProjects, getProject } = useLiveData();
+  const [selectedResultRaw, setSelectedResult] = useState<ProjectSafetyItem | null>(null);
+  // Always show the latest pushed record for the selected project.
+  const selectedResult = selectedResultRaw ? getProject(selectedResultRaw.id) ?? selectedResultRaw : null;
   const [isNotFound, setIsNotFound] = useState(false);
   const [searchedQuery, setSearchedQuery] = useState('');
   const [isStopWatchingMenuOpen, setIsStopWatchingMenuOpen] = useState(false);
@@ -94,7 +98,7 @@ export function CheckView({
       const timer = setTimeout(() => {
         setSearchTerm(initialSearchTerm);
         const query = initialSearchTerm.trim().toLowerCase();
-        const matched = MOCK_PROJECTS.find(
+        const matched = liveProjects.find(
           (p) =>
             p.name.toLowerCase().includes(query) ||
             p.reraNumber.toLowerCase() === query ||
@@ -107,7 +111,7 @@ export function CheckView({
       }, 0);
       return () => clearTimeout(timer);
     }
-  }, [initialSearchTerm, onClearInitialSearch]);
+  }, [initialSearchTerm, onClearInitialSearch, liveProjects]);
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
@@ -120,7 +124,7 @@ export function CheckView({
 
   // Autocomplete filtering based on user input
   const matchingProjects = searchTerm.trim().length > 0
-    ? MOCK_PROJECTS.filter((p) => {
+    ? liveProjects.filter((p) => {
         const query = searchTerm.toLowerCase();
         return (
           p.name.toLowerCase().includes(query) ||
@@ -146,7 +150,7 @@ export function CheckView({
     if (!searchTerm.trim()) return;
 
     // Find best match in mock projects
-    const matched = MOCK_PROJECTS.find(
+    const matched = liveProjects.find(
       (p) =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.reraNumber.toLowerCase() === searchTerm.toLowerCase().trim() ||
@@ -163,7 +167,7 @@ export function CheckView({
 
   const handleChipClick = (chipQuery: string) => {
     setSearchTerm(chipQuery);
-    const matched = MOCK_PROJECTS.find((p) => p.name.toLowerCase().includes(chipQuery.toLowerCase()));
+    const matched = liveProjects.find((p) => p.name.toLowerCase().includes(chipQuery.toLowerCase()));
     executeAudit(matched || null, chipQuery);
   };
 
