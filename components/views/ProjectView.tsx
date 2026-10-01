@@ -1,0 +1,685 @@
+'use client';
+
+import React, { useState } from 'react';
+import { 
+  AlertOctagon, 
+  MapPin, 
+  Clock, 
+  ChevronDown, 
+  ChevronRight, 
+  Share2, 
+  PhoneCall, 
+  Check, 
+  CheckCircle2, 
+  XCircle,
+  Building2,
+  ArrowLeft
+} from 'lucide-react';
+import { MOCK_PROJECTS, MICRO_MARKETS, ProjectSafetyItem } from '@/lib/mock-data';
+import { SafetyBadge } from '@/components/SafetyBadge';
+import { JargonTooltip } from '@/components/JargonTooltip';
+import { ViewType } from '@/components/TopBar';
+
+interface ProjectViewProps {
+  project: ProjectSafetyItem;
+  onNavigate: (view: ViewType) => void;
+  onSelectProject: (project: ProjectSafetyItem) => void;
+}
+
+export function ProjectView({ project, onNavigate, onSelectProject }: ProjectViewProps) {
+  const [isWhyWarningOpen, setIsWhyWarningOpen] = useState(false);
+  const [openSafetyDetails, setOpenSafetyDetails] = useState<{ [key: string]: boolean }>({});
+  const [copied, setCopied] = useState(false);
+
+  // Micro-market calculations
+  const market = MICRO_MARKETS.find((m) => m.name.toLowerCase().includes(project.location.toLowerCase()) || project.microMarket.includes(m.name)) || MICRO_MARKETS[0];
+  const areaAvgRate = Math.round((market.minRate + market.maxRate) / 2);
+  const rateDiffPercent = Math.round(((project.ratePerSqFt - areaAvgRate) / areaAvgRate) * 100);
+
+  const toggleSafetyDetail = (id: string) => {
+    setOpenSafetyDetails((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const handleShare = () => {
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const tailoredQuestions: string[] = project.status === 'risk'
+    ? [
+        'Can the builder show the official revenue survey map superimposing the 30-meter lake buffer line?',
+        'Has the project received written confirmation from HYDRAA regarding survey plot clearance?',
+        'Will our individual apartment deed guarantee compensation if municipal sanctions are challenged in court?',
+        'Which designated nationalized banks have approved unconditional home loans for this specific survey number?',
+        'Can I review the non-agricultural land conversion order (NALA) and town planning master sanction?'
+      ]
+    : project.status === 'warning'
+    ? [
+        'Has the revised sanction for upper floors received final municipal planning sign-off?',
+        'When is the RERA quarterly disclosure update scheduled, and can I see the latest architect milestone certificate?',
+        'What is the precise distance between the nearest compound wall and the local stormwater channel (nala)?',
+        'What is the exact undivided share of land (UDS) registered in the draft agreement of sale?',
+        'Is there any pending litigation or ceiling review on the survey numbers comprising this layout?'
+      ]
+    : [
+        'Can you provide the sanctioned floor-by-floor architectural drawing for my specific flat and floor?',
+        'What is the registered RERA escrow bank account number into which all buyer payments are deposited?',
+        'What is the exact undivided share of land (UDS) allocated to this specific unit?',
+        'Are the clubhouse, sports amenities, and sub-station included in the common undivided layout property?',
+        'Can you provide the 30-year non-encumbrance certificate (EC) up to the current calendar month?'
+      ];
+
+  const beginnerSummary = `${project.name} is a ${project.config} gated community in ${project.location}, scheduled for completion around ${project.possessionYear}. In terms of legal health, it currently ${
+    project.status === 'safe'
+      ? 'possesses clear government title deeds with verified municipal permits and sits outside lake conservation areas.'
+      : project.status === 'warning'
+      ? 'has valid fundamentals but has pending administrative updates or proximity to drainage canals that require verification.'
+      : 'carries serious regulatory red flags due to plot encroachment into protected lake buffer zones under active enforcement.'
+  } Before placing any deposit, verify that your exact floor and tower are sanctioned on the official layout.`;
+
+  return (
+    <div className="space-y-8 animate-in fade-in duration-200 pb-24 md:pb-12">
+      {/* Back button */}
+      <div>
+        <button
+          type="button"
+          onClick={() => onNavigate('home')}
+          className="text-xs font-semibold text-stone-600 hover:text-[#0F1B2D] inline-flex items-center gap-1.5 py-1 min-h-[44px] cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
+          <span>Back to Home</span>
+        </button>
+      </div>
+
+      {/* Switcher Bar */}
+      <div className="bg-stone-100 p-3 rounded-xl border border-stone-200 flex items-center justify-between gap-3 flex-wrap">
+        <span className="text-xs font-semibold text-stone-600">
+          Viewing Project Audit:
+        </span>
+        <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
+          {MOCK_PROJECTS.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => onSelectProject(p)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap min-h-[36px] cursor-pointer ${
+                p.id === project.id
+                  ? 'bg-white text-[#0F1B2D] font-bold border border-stone-200 shadow-2xs'
+                  : 'text-stone-600 hover:text-stone-900'
+              }`}
+            >
+              {p.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* STICKY SUMMARY HEADER */}
+      <header className="sticky top-18 z-30 bg-[#FAF8F5] border border-stone-200 rounded-xl p-4 sm:p-5 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Building2 className="w-5 h-5 text-[#0E7C86] shrink-0" strokeWidth={1.5} />
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="font-serif font-bold text-lg sm:text-xl text-[#0F1B2D]">
+                {project.name}
+              </h1>
+              <span className="text-xs text-stone-500 font-medium">
+                · {project.location}
+              </span>
+            </div>
+            <div className="text-[11px] font-mono text-stone-500">
+              RERA: {project.reraNumber}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0">
+          <SafetyBadge status={project.status} size="sm" showScore={false} />
+
+          {/* Small Score Ring */}
+          <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+              <circle
+                cx="18"
+                cy="18"
+                r="14"
+                className="stroke-stone-200 fill-none"
+                strokeWidth="3.5"
+              />
+              <circle
+                cx="18"
+                cy="18"
+                r="14"
+                className={`fill-none ${
+                  project.status === 'safe'
+                    ? 'stroke-emerald-600'
+                    : project.status === 'warning'
+                    ? 'stroke-amber-500'
+                    : 'stroke-rose-600'
+                }`}
+                strokeWidth="3.5"
+                strokeDasharray={87.96}
+                strokeDashoffset={87.96 * (1 - project.score / 100)}
+                strokeLinecap="round"
+              />
+            </svg>
+            <span className="absolute text-[11px] font-bold text-[#0F1B2D]">
+              {project.score}
+            </span>
+          </div>
+        </div>
+      </header>
+
+      {/* RED-STATUS WARNING CARD */}
+      {project.status === 'risk' && (
+        <section className="bg-rose-50 border border-rose-200 rounded-xl p-6 space-y-3 animate-in fade-in duration-150">
+          <div className="flex items-start gap-3">
+            <AlertOctagon className="w-5 h-5 text-rose-700 shrink-0 mt-0.5" strokeWidth={1.5} />
+            <div className="space-y-1">
+              <h2 className="font-serif font-bold text-lg text-rose-950">
+                Critical Safety Warning: Buffer Zone Conflict Detected
+              </h2>
+              <p className="text-xs sm:text-sm text-rose-900 leading-relaxed">
+                Cadastral mapping indicates that this layout borders or encroaches upon protected lake full tank level (<JargonTooltip term="FTL" />) boundaries. In Hyderabad, civic authorities under <JargonTooltip term="HYDRAA" /> have been actively demolishing unauthorized structures on waterbodies.
+              </p>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-rose-200">
+            <button
+              type="button"
+              onClick={() => setIsWhyWarningOpen(!isWhyWarningOpen)}
+              className="text-xs font-bold text-rose-900 hover:text-rose-950 flex items-center gap-1.5 py-1 min-h-[36px] cursor-pointer"
+            >
+              <span>{isWhyWarningOpen ? 'Hide analysis' : 'Why this matters for a buyer'}</span>
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${isWhyWarningOpen ? 'rotate-180' : ''}`} strokeWidth={1.5} />
+            </button>
+
+            {isWhyWarningOpen && (
+              <div className="mt-2 p-3.5 rounded-lg bg-white border border-rose-200 text-xs text-rose-900 space-y-2 leading-relaxed">
+                <p>
+                  <strong>1. Demolition & Regularization:</strong> Under state government directives, structures built within lake FTL or nala buffer zones cannot be regularized.
+                </p>
+                <p>
+                  <strong>2. Utility Disconnections:</strong> Properties identified in lake beds face immediate disconnection of municipal drinking water and electricity grids.
+                </p>
+                <p>
+                  <strong>3. Mortgage Denial:</strong> Most nationalized banks will refuse to disburse housing loans or demand immediate recovery if survey coordinates flag buffer violations.
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* MAIN CONTENT GRID */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left Column (Content Sections 1 through 5) */}
+        <div className="lg:col-span-8 space-y-10">
+          
+          {/* SECTION 1: "In plain words" */}
+          <section className="bg-white rounded-xl border border-stone-200 p-6 sm:p-8 space-y-3 text-left">
+            <div className="flex items-center justify-between">
+              <span className="text-xs uppercase font-bold tracking-wider text-[#0E7C86]">
+                Section 1
+              </span>
+              <button
+                type="button"
+                onClick={handleShare}
+                className="text-xs text-stone-500 hover:text-[#0F1B2D] flex items-center gap-1 py-1 px-2.5 rounded-lg border border-stone-200 hover:bg-stone-50 transition-colors cursor-pointer"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" strokeWidth={1.5} /> : <Share2 className="w-3.5 h-3.5" strokeWidth={1.5} />}
+                <span>{copied ? 'Copied' : 'Share'}</span>
+              </button>
+            </div>
+
+            <h2 className="font-serif text-2xl font-bold text-[#0F1B2D]">
+              In plain words
+            </h2>
+
+            <p className="text-sm sm:text-base text-stone-700 leading-relaxed">
+              {beginnerSummary}
+            </p>
+          </section>
+
+          {/* SECTION 2: "Safety checks" */}
+          <section className="space-y-4 text-left">
+            <div>
+              <span className="text-xs uppercase font-bold tracking-wider text-[#0E7C86]">
+                Section 2
+              </span>
+              <h2 className="font-serif text-2xl font-bold text-[#0F1B2D]">
+                Safety checks
+              </h2>
+              <p className="text-xs text-stone-500 mt-0.5">
+                Official state portal audits updated by our diligence desk.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3">
+              {/* RERA */}
+              <div className="bg-white rounded-xl border border-stone-200 p-5 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    {project.reraStatus === 'Active' ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" strokeWidth={1.5} />
+                    ) : (
+                      <AlertOctagon className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" strokeWidth={1.5} />
+                    )}
+                    <div>
+                      <h3 className="font-bold text-base text-[#0F1B2D]">
+                        <JargonTooltip term="RERA" /> Registration Status
+                      </h3>
+                      <div className="text-xs text-stone-500 mt-0.5">
+                        Audit Date: <strong>{project.lastVerifiedDate}</strong>
+                      </div>
+                    </div>
+                  </div>
+                  <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${
+                    project.reraStatus === 'Active' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'
+                  }`}>
+                    {project.reraStatus}
+                  </span>
+                </div>
+
+                <p className="text-xs sm:text-sm text-stone-600 leading-relaxed pl-7">
+                  {project.reraStatus === 'Active'
+                    ? `Registered under TG-RERA No: ${project.reraNumber}. Escrow bank deposits and quarterly disclosures are up to date.`
+                    : `Registration application renewal is currently processing. No active final certificate publicly listed on the portal.`}
+                </p>
+
+                <div className="pl-7 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => toggleSafetyDetail('rera')}
+                    className="text-xs font-semibold text-[#0E7C86] hover:underline flex items-center gap-1 cursor-pointer py-1"
+                  >
+                    <span>{openSafetyDetails['rera'] ? 'Hide breakdown' : 'See why (Regulator disclosure)'}</span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${openSafetyDetails['rera'] ? 'rotate-180' : ''}`} strokeWidth={1.5} />
+                  </button>
+
+                  {openSafetyDetails['rera'] && (
+                    <div className="mt-2 p-3 bg-stone-50 rounded-lg border border-stone-200 text-xs text-stone-700 leading-relaxed">
+                      All land title deeds trace back to non-agricultural conversion. Escrow account records confirm construction funds are ring-fenced.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Building Plans */}
+              <div className="bg-white rounded-xl border border-stone-200 p-5 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    {project.buildingPlan === 'Approved' ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" strokeWidth={1.5} />
+                    ) : (
+                      <AlertOctagon className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" strokeWidth={1.5} />
+                    )}
+                    <div>
+                      <h3 className="font-bold text-base text-[#0F1B2D]">
+                        Building Plan Sanction (<JargonTooltip term="GHMC" /> / <JargonTooltip term="HMDA" />)
+                      </h3>
+                      <div className="text-xs text-stone-500 mt-0.5">
+                        Audit Date: <strong>{project.lastVerifiedDate}</strong>
+                      </div>
+                    </div>
+                  </div>
+                  <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${
+                    project.buildingPlan === 'Approved' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'
+                  }`}>
+                    {project.buildingPlan}
+                  </span>
+                </div>
+
+                <p className="text-xs sm:text-sm text-stone-600 leading-relaxed pl-7">
+                  {project.buildingPlan === 'Approved'
+                    ? 'Town planning permissions and structural safety clearances approved for the entire master layout.'
+                    : 'The developer has applied for an additional floor permission amendment that is pending civic sign-off.'}
+                </p>
+
+                <div className="pl-7 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => toggleSafetyDetail('plans')}
+                    className="text-xs font-semibold text-[#0E7C86] hover:underline flex items-center gap-1 cursor-pointer py-1"
+                  >
+                    <span>{openSafetyDetails['plans'] ? 'Hide breakdown' : 'See why (Sanction drawing notes)'}</span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${openSafetyDetails['plans'] ? 'rotate-180' : ''}`} strokeWidth={1.5} />
+                  </button>
+
+                  {openSafetyDetails['plans'] && (
+                    <div className="mt-2 p-3 bg-stone-50 rounded-lg border border-stone-200 text-xs text-stone-700 leading-relaxed">
+                      Approved drawings confirm compliant road setbacks, dual basement parking ventilation, and fire safety driveways.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Lake Buffer */}
+              <div className="bg-white rounded-xl border border-stone-200 p-5 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    {project.lakeBuffer === 'Clear' ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" strokeWidth={1.5} />
+                    ) : (
+                      <XCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" strokeWidth={1.5} />
+                    )}
+                    <div>
+                      <h3 className="font-bold text-base text-[#0F1B2D]">
+                        Lake & Waterbody Buffer Zone (<JargonTooltip term="FTL" />)
+                      </h3>
+                      <div className="text-xs text-stone-500 mt-0.5">
+                        Audit Date: <strong>{project.lastVerifiedDate}</strong>
+                      </div>
+                    </div>
+                  </div>
+                  <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${
+                    project.lakeBuffer === 'Clear' ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800'
+                  }`}>
+                    {project.lakeBuffer}
+                  </span>
+                </div>
+
+                <p className="text-xs sm:text-sm text-stone-600 leading-relaxed pl-7">
+                  {project.lakeBuffer === 'Clear'
+                    ? 'Plot boundaries sit outside the mandatory 30-meter buffer line and irrigation channels.'
+                    : 'Portions of the project boundary lie inside the lake buffer zone flagged under recent HYDRAA enforcement.'}
+                </p>
+
+                <div className="pl-7 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => toggleSafetyDetail('lake')}
+                    className="text-xs font-semibold text-[#0E7C86] hover:underline flex items-center gap-1 cursor-pointer py-1"
+                  >
+                    <span>{openSafetyDetails['lake'] ? 'Hide breakdown' : 'See why (Cadastral lake survey)'}</span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${openSafetyDetails['lake'] ? 'rotate-180' : ''}`} strokeWidth={1.5} />
+                  </button>
+
+                  {openSafetyDetails['lake'] && (
+                    <div className="mt-2 p-3 bg-stone-50 rounded-lg border border-stone-200 text-xs text-stone-700 leading-relaxed">
+                      Cross-referenced with National Remote Sensing Centre hydrological maps and state irrigation survey sheets.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* SECTION 3: "Where is it?" */}
+          <section className="bg-white rounded-xl border border-stone-200 p-6 sm:p-8 space-y-4 text-left">
+            <div>
+              <span className="text-xs uppercase font-bold tracking-wider text-[#0E7C86]">
+                Section 3
+              </span>
+              <h2 className="font-serif text-2xl font-bold text-[#0F1B2D]">
+                Where is it?
+              </h2>
+              <p className="text-xs text-stone-500 mt-0.5">
+                Layout survey plot relative to natural waterbodies and regional IT corridors.
+              </p>
+            </div>
+
+            {/* Stylized SVG Map (Clean, flat line-drawn) */}
+            <div className="relative w-full h-64 sm:h-72 bg-[#F3EFE8] rounded-xl overflow-hidden border border-stone-300">
+              <svg className="w-full h-full" viewBox="0 0 600 300" preserveAspectRatio="none">
+                <defs>
+                  <pattern id="gridPattern" width="30" height="30" patternUnits="userSpaceOnUse">
+                    <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#E3DBD0" strokeWidth="0.8" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#gridPattern)" />
+
+                {/* Road lines */}
+                <path d="M 0 120 Q 200 130 400 90 T 600 80" fill="none" stroke="#D3C9BD" strokeWidth="4" />
+                <path d="M 280 0 Q 300 150 340 300" fill="none" stroke="#D3C9BD" strokeWidth="4" />
+
+                {/* Shaded Blue Lake and FTL Buffer Zone */}
+                <path
+                  d="M 360 210 Q 420 160 520 180 Q 580 230 510 280 Q 410 290 360 210 Z"
+                  fill="#BAE6FD"
+                  fillOpacity="0.4"
+                  stroke="#38BDF8"
+                  strokeWidth="1.5"
+                  strokeDasharray="4 3"
+                />
+                <path
+                  d="M 390 220 Q 440 180 500 200 Q 540 240 480 270 Q 420 270 390 220 Z"
+                  fill="#38BDF8"
+                  fillOpacity="0.8"
+                />
+
+                <text x="450" y="240" fill="#0369A1" fontSize="11" fontWeight="600" textAnchor="middle">
+                  Osman Lake
+                </text>
+                <text x="450" y="255" fill="#0284C7" fontSize="9" textAnchor="middle">
+                  30m FTL Conservation Buffer
+                </text>
+
+                {/* Project PIN Location */}
+                {project.status === 'risk' ? (
+                  <g transform="translate(415, 205)">
+                    <circle cx="0" cy="0" r="12" fill="#E11D48" />
+                    <circle cx="0" cy="0" r="4" fill="#FFFFFF" />
+                  </g>
+                ) : (
+                  <g transform="translate(220, 110)">
+                    <circle cx="0" cy="0" r="10" fill="#059669" />
+                    <circle cx="0" cy="0" r="4" fill="#FFFFFF" />
+                  </g>
+                )}
+              </svg>
+
+              {/* Pin Label Overlay */}
+              <div
+                className={`absolute p-2.5 rounded-lg border text-xs font-semibold bg-white flex items-center gap-2 ${
+                  project.status === 'risk'
+                    ? 'bottom-4 left-4 border-rose-200 text-rose-900'
+                    : 'top-4 left-4 border-stone-200 text-[#0F1B2D]'
+                }`}
+              >
+                <MapPin className={`w-4 h-4 ${project.status === 'risk' ? 'text-rose-600' : 'text-[#0E7C86]'}`} strokeWidth={1.5} />
+                <div>
+                  <div className="font-bold">{project.name}</div>
+                  <div className="text-[10px] text-stone-500 font-normal">
+                    {project.location} ({project.microMarket})
+                  </div>
+                </div>
+              </div>
+
+              {/* Buffer Status & Commute Badges */}
+              <div className="absolute top-4 right-4 flex flex-col items-end gap-1.5">
+                <span
+                  className={`text-xs px-3 py-1 rounded-full font-bold ${
+                    project.lakeBuffer === 'Clear'
+                      ? 'bg-emerald-700 text-white'
+                      : 'bg-rose-700 text-white'
+                  }`}
+                >
+                  {project.lakeBuffer === 'Clear' ? 'Clear of Lake Buffer' : 'Inside Lake Buffer'}
+                </span>
+
+                <span className="text-[11px] font-medium bg-white text-stone-700 px-2.5 py-1 rounded-full border border-stone-200 flex items-center gap-1">
+                  <Clock className="w-3 h-3 text-[#0E7C86]" strokeWidth={1.5} />
+                  <span>{project.distanceToIT}</span>
+                </span>
+              </div>
+            </div>
+          </section>
+
+          {/* SECTION 4: "The numbers" */}
+          <section className="bg-white rounded-xl border border-stone-200 p-6 sm:p-8 space-y-6 text-left">
+            <div>
+              <span className="text-xs uppercase font-bold tracking-wider text-[#0E7C86]">
+                Section 4
+              </span>
+              <h2 className="font-serif text-2xl font-bold text-[#0F1B2D]">
+                The numbers
+              </h2>
+              <p className="text-xs text-stone-500 mt-0.5">
+                Pricing specifications and micro-market rate comparisons.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3.5 rounded-lg bg-stone-50 border border-stone-200">
+                <span className="text-[11px] text-stone-500 block mb-1">Price Range</span>
+                <span className="text-sm sm:text-base font-bold text-[#0F1B2D]">{project.priceRange}</span>
+              </div>
+              <div className="p-3.5 rounded-lg bg-stone-50 border border-stone-200">
+                <span className="text-[11px] text-stone-500 block mb-1">Project Rate</span>
+                <span className="text-sm sm:text-base font-bold text-[#0E7C86]">
+                  ₹{project.ratePerSqFt.toLocaleString('en-IN')} <span className="text-xs font-normal text-stone-500">/ sq ft</span>
+                </span>
+              </div>
+              <div className="p-3.5 rounded-lg bg-stone-50 border border-stone-200">
+                <span className="text-[11px] text-stone-500 block mb-1">Configuration</span>
+                <span className="text-sm sm:text-base font-bold text-[#0F1B2D]">{project.config}</span>
+              </div>
+              <div className="p-3.5 rounded-lg bg-stone-50 border border-stone-200">
+                <span className="text-[11px] text-stone-500 block mb-1">Possession Year</span>
+                <span className="text-sm sm:text-base font-bold text-[#0F1B2D]">{project.possessionYear}</span>
+              </div>
+            </div>
+
+            {/* RATE PER SQ FT VS AREA AVERAGE */}
+            <div className="p-5 rounded-xl bg-[#FAF8F5] border border-stone-200 space-y-3">
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="font-semibold text-[#0F1B2D]">
+                  Rate per sq ft vs. {project.location} Average:
+                </span>
+                <span className="font-bold text-[#0E7C86]">
+                  {rateDiffPercent >= 0 ? `+${rateDiffPercent}% vs avg` : `${rateDiffPercent}% vs avg`}
+                </span>
+              </div>
+
+              <div className="space-y-2.5 text-xs">
+                <div className="space-y-1">
+                  <div className="flex justify-between text-stone-600">
+                    <span className="font-medium text-[#0F1B2D]">{project.name}</span>
+                    <span className="font-bold text-[#0E7C86]">₹{project.ratePerSqFt.toLocaleString('en-IN')} / sq ft</span>
+                  </div>
+                  <div className="h-2 w-full bg-stone-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-[#0E7C86] rounded-full"
+                      style={{
+                        width: `${Math.min(100, Math.max(20, (project.ratePerSqFt / 20000) * 100))}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex justify-between text-stone-600">
+                    <span className="font-medium">{project.location} Benchmark</span>
+                    <span className="font-semibold text-stone-800">₹{areaAvgRate.toLocaleString('en-IN')} / sq ft</span>
+                  </div>
+                  <div className="h-2 w-full bg-stone-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-stone-400 rounded-full"
+                      style={{
+                        width: `${Math.min(100, Math.max(20, (areaAvgRate / 20000) * 100))}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-stone-500">
+                Benchmark based on transacted registry records in {project.location} (Range: ₹{market.minRate.toLocaleString('en-IN')} – ₹{market.maxRate.toLocaleString('en-IN')}).
+              </p>
+            </div>
+          </section>
+
+          {/* SECTION 5: "Questions to ask the builder" */}
+          <section className="bg-white rounded-xl border border-stone-200 p-6 sm:p-8 space-y-4 text-left">
+            <div>
+              <span className="text-xs uppercase font-bold tracking-wider text-[#0E7C86]">
+                Section 5
+              </span>
+              <h2 className="font-serif text-2xl font-bold text-[#0F1B2D]">
+                Questions to ask the builder
+              </h2>
+              <p className="text-xs text-stone-500 mt-0.5">
+                Take these 5 specific questions with you to the sales gallery:
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              {tailoredQuestions.map((q, idx) => (
+                <div
+                  key={idx}
+                  className="p-3.5 rounded-lg bg-stone-50 border border-stone-200 flex items-start gap-3 text-xs sm:text-sm text-stone-800"
+                >
+                  <span className="font-bold text-[#0E7C86] shrink-0 mt-0.5">
+                    {idx + 1}.
+                  </span>
+                  <p className="leading-relaxed">{q}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        {/* Right Sidebar on Desktop (Sticky) */}
+        <div className="hidden lg:block lg:col-span-4 sticky top-36 space-y-4 text-left">
+          <div className="bg-white rounded-xl border border-stone-200 p-6 space-y-4">
+            <div className="text-xs font-bold uppercase tracking-wider text-[#B8893B]">
+              Independent Advisory
+            </div>
+
+            <h3 className="font-serif font-bold text-xl text-[#0F1B2D]">
+              Need a personalized legal audit?
+            </h3>
+
+            <p className="text-xs text-stone-600 leading-relaxed">
+              Speak directly with an HoI property analyst before signing any booking document or advancing funds for {project.name}.
+            </p>
+
+            <ul className="text-xs text-stone-600 space-y-1.5 pt-2 border-t border-stone-100">
+              <li className="flex items-center gap-2">
+                <Check className="w-3.5 h-3.5 text-[#0E7C86]" strokeWidth={1.5} />
+                <span>Zero sales pressure</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-3.5 h-3.5 text-[#0E7C86]" strokeWidth={1.5} />
+                <span>Survey map verification</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-3.5 h-3.5 text-[#0E7C86]" strokeWidth={1.5} />
+                <span>Price negotiation guidance</span>
+              </li>
+            </ul>
+
+            {/* Gold CTA Button */}
+            <button
+              type="button"
+              onClick={() => onNavigate('booking')}
+              className="w-full min-h-[50px] py-3.5 px-6 rounded-xl bg-[#B8893B] hover:bg-[#9E742E] text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+            >
+              <span>Talk to an Advisor about this project</span>
+              <ChevronRight className="w-4 h-4" strokeWidth={1.5} />
+            </button>
+            <p className="text-center text-[11px] text-stone-400">
+              No phone number asked here · 20-min session
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* STICKY BOTTOM BAR ON MOBILE (Gold CTA Button) */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 p-3 bg-white border-t border-stone-200 z-40">
+        <button
+          type="button"
+          onClick={() => onNavigate('booking')}
+          className="w-full min-h-[48px] py-3 px-5 rounded-xl bg-[#B8893B] hover:bg-[#9E742E] text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <PhoneCall className="w-4 h-4" strokeWidth={1.5} />
+          <span>Talk to an Advisor about this project</span>
+        </button>
+      </div>
+    </div>
+  );
+}

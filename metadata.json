@@ -1,0 +1,6 @@
+{
+  "name": "hyderabad.properties",
+  "description": "Trust-first property safety guide for Hyderabad by House of Investors. Know if a property is safe before you fall in love with it.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
