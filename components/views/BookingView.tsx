@@ -16,6 +16,7 @@ import {
 import { ViewType } from '@/components/TopBar';
 import { ProjectSafetyItem } from '@/lib/mock-data';
 import { UserPreferences } from '@/app/page';
+import { PrivacyPledge } from '@/components/PrivacyPledge';
 
 interface BookingViewProps {
   onNavigate: (view: ViewType) => void;
@@ -220,10 +221,10 @@ export function BookingView({
                       key={tz.code}
                       type="button"
                       onClick={() => setTimezone(tz.code)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors min-h-[38px] cursor-pointer border ${
+                      className={`px-3 py-1.5 rounded-full text-xs font-mono font-medium transition-colors min-h-[38px] cursor-pointer border ${
                         timezone === tz.code
-                          ? 'border-[#0E7C86] bg-[#0E7C86] text-white font-semibold'
-                          : 'border-stone-200 bg-white text-stone-700 hover:border-stone-300'
+                          ? 'border-[#131313] bg-[#131313] text-[#D6FD70] font-bold shadow-xs'
+                          : 'border-stone-200 bg-white text-stone-700 hover:border-stone-400'
                       }`}
                     >
                       {tz.code}
@@ -248,7 +249,7 @@ export function BookingView({
                         onClick={() => setSelectedSlotId(slot.id)}
                         className={`p-4 rounded-xl text-left border transition-colors cursor-pointer min-h-[64px] flex flex-col justify-between ${
                           isSelected
-                            ? 'border-[#0E7C86] bg-white ring-2 ring-[#0E7C86]'
+                            ? 'border-[#131313] bg-white ring-2 ring-[#D6FD70]'
                             : 'border-stone-200 bg-white hover:border-stone-300'
                         }`}
                       >
@@ -257,12 +258,12 @@ export function BookingView({
                             {slot.dayLabel} · {slot.dateLabel}
                           </span>
                           {isSelected && (
-                            <Check className="w-4 h-4 text-[#0E7C86]" strokeWidth={2} />
+                            <Check className="w-4 h-4 text-[#131313]" strokeWidth={2} />
                           )}
                         </div>
 
                         <div className="text-sm font-bold text-[#0F1B2D] mt-1 flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5 text-[#0E7C86]" strokeWidth={1.5} />
+                          <Clock className="w-3.5 h-3.5 text-[#131313]" strokeWidth={1.5} />
                           <span>{slot.times[timezone]}</span>
                         </div>
                       </button>
@@ -276,10 +277,10 @@ export function BookingView({
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="w-full min-h-[50px] py-3.5 px-6 rounded-xl bg-[#0E7C86] hover:bg-[#095961] text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full min-h-[50px] py-3.5 px-6 rounded-full bg-[#131313] hover:bg-black text-[#D6FD70] text-sm font-bold font-mono uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                 >
                   <span>Continue to Confirmation</span>
-                  <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
+                  <ArrowRight className="w-4 h-4 text-[#D6FD70]" strokeWidth={2} />
                 </button>
               </div>
             </div>
@@ -355,17 +356,14 @@ export function BookingView({
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-xs font-semibold text-[#0F1B2D]">
-                      WhatsApp number
+                      WhatsApp number <span className="text-stone-400 font-normal">(optional)</span>
                     </label>
-                    <span className="text-[11px] text-stone-400 font-normal">
-                      (Optional)
-                    </span>
                   </div>
                   <div className="relative">
                     <MessageSquare className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" strokeWidth={1.5} />
                     <input
                       type="tel"
-                      placeholder="e.g. +91 98765 43210 (Optional)"
+                      placeholder="e.g. +91 98765 43210 (optional)"
                       value={whatsapp}
                       onChange={(e) => setWhatsapp(e.target.value)}
                       className="w-full pl-10 pr-3 py-3 rounded-xl border border-stone-200 bg-white text-xs sm:text-sm focus:outline-none focus:border-[#0E7C86] min-h-[44px]"
@@ -377,18 +375,16 @@ export function BookingView({
                 </div>
               </div>
 
-              {/* Reassurance line */}
-              <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-600 flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#0E7C86] shrink-0" strokeWidth={1.5} />
-                <span>We never sell your details. No spam. No developer sales calls.</span>
-              </div>
+              {/* Privacy Pledge component directly above submit button */}
+              <PrivacyPledge />
 
-              {/* Confirm CTA (Gold) */}
+              {/* Confirm CTA (Neon) - disabled until email is valid */}
               <button
                 type="submit"
-                className="w-full min-h-[52px] py-3.5 px-6 rounded-xl bg-[#B8893B] hover:bg-[#9E742E] text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                disabled={!email.trim() || !email.includes('@')}
+                className="w-full min-h-[52px] py-3.5 px-6 rounded-full bg-[#D6FD70] hover:bg-[#c7f354] text-[#131313] text-sm font-bold font-mono uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <PhoneCall className="w-4 h-4" strokeWidth={1.5} />
+                <PhoneCall className="w-4 h-4 text-[#131313]" strokeWidth={2} />
                 <span>Confirm Consultation Call</span>
               </button>
             </form>

@@ -13,23 +13,55 @@ import {
   CheckCircle2, 
   XCircle,
   Building2,
-  ArrowLeft
+  ArrowLeft,
+  Bell,
+  Upload,
+  FileText,
+  Mail,
+  MessageSquare,
+  Receipt,
+  Trash2
 } from 'lucide-react';
 import { MOCK_PROJECTS, MICRO_MARKETS, ProjectSafetyItem } from '@/lib/mock-data';
 import { SafetyBadge } from '@/components/SafetyBadge';
 import { JargonTooltip } from '@/components/JargonTooltip';
 import { ViewType } from '@/components/TopBar';
+import { PrivacyPledge } from '@/components/PrivacyPledge';
 
 interface ProjectViewProps {
   project: ProjectSafetyItem;
   onNavigate: (view: ViewType) => void;
   onSelectProject: (project: ProjectSafetyItem) => void;
+  isWatching?: boolean;
+  onOpenWatchSheet?: (project: ProjectSafetyItem) => void;
+  onStopWatching?: (projectId: string) => void;
 }
 
-export function ProjectView({ project, onNavigate, onSelectProject }: ProjectViewProps) {
+export function ProjectView({ 
+  project, 
+  onNavigate, 
+  onSelectProject,
+  isWatching = false,
+  onOpenWatchSheet,
+  onStopWatching
+}: ProjectViewProps) {
   const [isWhyWarningOpen, setIsWhyWarningOpen] = useState(false);
   const [openSafetyDetails, setOpenSafetyDetails] = useState<{ [key: string]: boolean }>({});
   const [copied, setCopied] = useState(false);
+  const [isStopWatchingMenuOpen, setIsStopWatchingMenuOpen] = useState(false);
+
+  // Watch project state
+  const [isWatchOpen, setIsWatchOpen] = useState(false);
+  const [watchEmail, setWatchEmail] = useState('');
+  const [watchWhatsapp, setWatchWhatsapp] = useState('');
+  const [watchSaved, setWatchSaved] = useState(false);
+
+  // Document upload state
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [uploadFileName, setUploadFileName] = useState('');
+  const [uploadEmail, setUploadEmail] = useState('');
+  const [uploadWhatsapp, setUploadWhatsapp] = useState('');
+  const [uploadSubmitted, setUploadSubmitted] = useState(false);
 
   // Micro-market calculations
   const market = MICRO_MARKETS.find((m) => m.name.toLowerCase().includes(project.location.toLowerCase()) || project.microMarket.includes(m.name)) || MICRO_MARKETS[0];
@@ -135,7 +167,45 @@ export function ProjectView({ project, onNavigate, onSelectProject }: ProjectVie
           </div>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0 flex-wrap justify-end">
+          {/* Watch secondary button */}
+          {isWatching ? (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsStopWatchingMenuOpen(!isStopWatchingMenuOpen)}
+                className="px-3 py-1.5 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-800 text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer min-h-[36px]"
+              >
+                <Check className="w-3.5 h-3.5 text-emerald-600" strokeWidth={2} />
+                <span>Watching</span>
+              </button>
+              {isStopWatchingMenuOpen && (
+                <div className="absolute right-0 mt-1 w-36 bg-white border border-stone-200 rounded-lg shadow-lg p-1 z-30 animate-in fade-in duration-100">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onStopWatching) onStopWatching(project.id);
+                      setIsStopWatchingMenuOpen(false);
+                    }}
+                    className="w-full text-left px-2.5 py-1.5 text-xs text-rose-700 hover:bg-rose-50 rounded font-medium flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
+                    <span>Stop watching</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onOpenWatchSheet && onOpenWatchSheet(project)}
+              className="px-3 py-1.5 rounded-full border border-stone-300 hover:border-[#131313] bg-white text-stone-700 hover:text-[#131313] text-xs font-mono font-semibold inline-flex items-center gap-1.5 cursor-pointer min-h-[36px]"
+            >
+              <Bell className="w-3.5 h-3.5 text-[#131313]" strokeWidth={1.5} />
+              <span>Watch this project</span>
+            </button>
+          )}
+
           <SafetyBadge status={project.status} size="sm" showScore={false} />
 
           {/* Small Score Ring */}
@@ -591,6 +661,19 @@ export function ProjectView({ project, onNavigate, onSelectProject }: ProjectVie
                 Benchmark based on transacted registry records in {project.location} (Range: ₹{market.minRate.toLocaleString('en-IN')} – ₹{market.maxRate.toLocaleString('en-IN')}).
               </p>
             </div>
+
+            {/* "See the full cost" CTA Button */}
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => onNavigate('cost')}
+                className="w-full sm:w-auto min-h-[46px] px-5 py-2.5 rounded-xl bg-[#0F1B2D] hover:bg-stone-800 text-white text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Receipt className="w-4 h-4 text-[#0E7C86]" strokeWidth={1.5} />
+                <span>See the full cost (taxes, stamp duty, loan EMI)</span>
+                <ChevronRight className="w-4 h-4" strokeWidth={1.5} />
+              </button>
+            </div>
           </section>
 
           {/* SECTION 5: "Questions to ask the builder" */}
@@ -621,62 +704,283 @@ export function ProjectView({ project, onNavigate, onSelectProject }: ProjectVie
               ))}
             </div>
           </section>
+
+          {/* WATCH & DOCUMENT UPLOAD SECTION */}
+          <section className="space-y-4 text-left">
+            <div>
+              <span className="text-xs uppercase font-bold tracking-wider text-[#0E7C86]">
+                Buyer Tools
+              </span>
+              <h2 className="font-serif text-2xl font-bold text-[#0F1B2D]">
+                Updates & Document Verification
+              </h2>
+              <p className="text-xs text-stone-500 mt-0.5">
+                Track status changes or have our diligence team review builder files.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              {/* 1. WATCH FORM */}
+              <div className="bg-white rounded-xl border border-stone-200 p-5 sm:p-6 space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-2.5">
+                    <Bell className="w-4 h-4 text-[#0E7C86] shrink-0 mt-0.5" strokeWidth={1.5} />
+                    <div>
+                      <h3 className="font-bold text-base text-[#0F1B2D]">
+                        Watch {project.name} <span className="font-normal text-xs text-stone-500">(optional)</span>
+                      </h3>
+                      <p className="text-xs text-stone-600 mt-0.5">
+                        Get an email notification if RERA quarterly reports, floor sanctions, or lake buffer records are updated.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsWatchOpen(!isWatchOpen)}
+                    className="text-xs font-semibold text-[#0E7C86] hover:underline flex items-center gap-1 shrink-0 py-1 cursor-pointer"
+                  >
+                    <span>{isWatchOpen ? 'Hide' : 'Watch updates'}</span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isWatchOpen ? 'rotate-180' : ''}`} strokeWidth={1.5} />
+                  </button>
+                </div>
+
+                {isWatchOpen && (
+                  <div>
+                    {!watchSaved ? (
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          if (watchEmail.trim() && watchEmail.includes('@')) {
+                            setWatchSaved(true);
+                          }
+                        }}
+                        className="space-y-3 pt-2 border-t border-stone-100"
+                      >
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-[#0F1B2D] mb-1">
+                              Email address <span className="text-stone-400 font-normal">(optional unless watching)</span>
+                            </label>
+                            <input
+                              type="email"
+                              value={watchEmail}
+                              onChange={(e) => setWatchEmail(e.target.value)}
+                              placeholder="yourname@domain.com"
+                              className="w-full px-3 py-2 rounded-xl border border-stone-200 bg-white text-xs sm:text-sm focus:outline-none focus:border-[#0E7C86] min-h-[44px]"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-semibold text-[#0F1B2D] mb-1">
+                              WhatsApp number <span className="text-stone-400 font-normal">(optional)</span>
+                            </label>
+                            <input
+                              type="tel"
+                              value={watchWhatsapp}
+                              onChange={(e) => setWatchWhatsapp(e.target.value)}
+                              placeholder="+91 98765 43210 (optional)"
+                              className="w-full px-3 py-2 rounded-xl border border-stone-200 bg-white text-xs sm:text-sm focus:outline-none focus:border-[#0E7C86] min-h-[44px]"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Privacy Pledge component directly above submit button */}
+                        <PrivacyPledge compact />
+
+                        <button
+                          type="submit"
+                          disabled={!watchEmail.trim() || !watchEmail.includes('@')}
+                          className="px-6 py-2.5 rounded-full bg-[#D6FD70] hover:bg-[#c7f354] text-[#131313] text-xs font-bold font-mono uppercase tracking-wider transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+                        >
+                          <Bell className="w-3.5 h-3.5 text-[#131313]" strokeWidth={2} />
+                          <span>Set alert for this project</span>
+                        </button>
+                      </form>
+                    ) : (
+                      <div className="p-3 bg-stone-50 rounded-lg border border-stone-200 text-xs text-stone-700 flex items-center gap-2">
+                        <Check className="w-4 h-4 text-emerald-600 shrink-0" strokeWidth={1.5} />
+                        <span>You are now watching <strong>{project.name}</strong>. Updates will be sent to {watchEmail}.</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* 2. DOCUMENT UPLOAD FORM */}
+              <div className="bg-white rounded-xl border border-stone-200 p-5 sm:p-6 space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-2.5">
+                    <Upload className="w-4 h-4 text-[#0E7C86] shrink-0 mt-0.5" strokeWidth={1.5} />
+                    <div>
+                      <h3 className="font-bold text-base text-[#0F1B2D]">
+                        Upload document for legal check <span className="font-normal text-xs text-stone-500">(optional)</span>
+                      </h3>
+                      <p className="text-xs text-stone-600 mt-0.5">
+                        Have our diligence team review a builder brochure, draft agreement of sale, or survey sketch.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsUploadOpen(!isUploadOpen)}
+                    className="text-xs font-semibold text-[#0E7C86] hover:underline flex items-center gap-1 shrink-0 py-1 cursor-pointer"
+                  >
+                    <span>{isUploadOpen ? 'Hide' : 'Upload file'}</span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isUploadOpen ? 'rotate-180' : ''}`} strokeWidth={1.5} />
+                  </button>
+                </div>
+
+                {isUploadOpen && (
+                  <div>
+                    {!uploadSubmitted ? (
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          if (uploadFileName && uploadEmail.trim() && uploadEmail.includes('@')) {
+                            setUploadSubmitted(true);
+                          }
+                        }}
+                        className="space-y-3 pt-2 border-t border-stone-100"
+                      >
+                        {/* File selector mock */}
+                        <div>
+                          <label className="block text-xs font-semibold text-[#0F1B2D] mb-1">
+                            Select agreement or brochure file (PDF, DOC, JPG)
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <label className="px-4 py-2.5 rounded-xl border border-stone-300 hover:bg-stone-50 text-xs font-medium cursor-pointer inline-flex items-center gap-1.5 text-stone-700 min-h-[44px]">
+                              <Upload className="w-3.5 h-3.5" strokeWidth={1.5} />
+                              <span>{uploadFileName || 'Choose document'}</span>
+                              <input
+                                type="file"
+                                accept=".pdf,.doc,.docx,.jpg,.png"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    setUploadFileName(file.name);
+                                  }
+                                }}
+                              />
+                            </label>
+                            {uploadFileName && (
+                              <span className="text-xs text-emerald-700 font-medium flex items-center gap-1">
+                                <Check className="w-3.5 h-3.5" strokeWidth={1.5} />
+                                Attached
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-[#0F1B2D] mb-1">
+                              Email address <span className="text-stone-400 font-normal">(optional unless uploading)</span>
+                            </label>
+                            <input
+                              type="email"
+                              value={uploadEmail}
+                              onChange={(e) => setUploadEmail(e.target.value)}
+                              placeholder="yourname@domain.com"
+                              className="w-full px-3 py-2 rounded-xl border border-stone-200 bg-white text-xs sm:text-sm focus:outline-none focus:border-[#0E7C86] min-h-[44px]"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-semibold text-[#0F1B2D] mb-1">
+                              WhatsApp number <span className="text-stone-400 font-normal">(optional)</span>
+                            </label>
+                            <input
+                              type="tel"
+                              value={uploadWhatsapp}
+                              onChange={(e) => setUploadWhatsapp(e.target.value)}
+                              placeholder="+91 98765 43210 (optional)"
+                              className="w-full px-3 py-2 rounded-xl border border-stone-200 bg-white text-xs sm:text-sm focus:outline-none focus:border-[#0E7C86] min-h-[44px]"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Privacy Pledge component directly above submit button */}
+                        <PrivacyPledge />
+
+                        <button
+                          type="submit"
+                          disabled={!uploadFileName || !uploadEmail.trim() || !uploadEmail.includes('@')}
+                          className="px-6 py-2.5 rounded-full bg-[#D6FD70] hover:bg-[#c7f354] text-[#131313] text-xs font-bold font-mono uppercase tracking-wider transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+                        >
+                          <FileText className="w-3.5 h-3.5 text-[#131313]" strokeWidth={2} />
+                          <span>Submit document for review</span>
+                        </button>
+                      </form>
+                    ) : (
+                      <div className="p-3 bg-stone-50 rounded-lg border border-stone-200 text-xs text-stone-700 flex items-center gap-2">
+                        <Check className="w-4 h-4 text-emerald-600 shrink-0" strokeWidth={1.5} />
+                        <span>Document received: <strong>{uploadFileName}</strong>. Our legal desk will email review notes to {uploadEmail}.</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
         </div>
 
         {/* Right Sidebar on Desktop (Sticky) */}
         <div className="hidden lg:block lg:col-span-4 sticky top-36 space-y-4 text-left">
-          <div className="bg-white rounded-xl border border-stone-200 p-6 space-y-4">
-            <div className="text-xs font-bold uppercase tracking-wider text-[#B8893B]">
+          <div className="bg-[#131313] text-white rounded-3xl border border-[#2F2F2F] p-6 space-y-4 shadow-xl">
+            <div className="text-xs font-mono font-bold uppercase tracking-wider text-[#D6FD70]">
               Independent Advisory
             </div>
 
-            <h3 className="font-serif font-bold text-xl text-[#0F1B2D]">
+            <h3 className="font-heading font-extrabold text-xl text-white">
               Need a personalized legal audit?
             </h3>
 
-            <p className="text-xs text-stone-600 leading-relaxed">
+            <p className="text-xs text-[#AAAAAA] leading-relaxed font-sans">
               Speak directly with an HoI property analyst before signing any booking document or advancing funds for {project.name}.
             </p>
 
-            <ul className="text-xs text-stone-600 space-y-1.5 pt-2 border-t border-stone-100">
+            <ul className="text-xs text-[#DDDDDD] space-y-1.5 pt-2 border-t border-[#2F2F2F] font-sans">
               <li className="flex items-center gap-2">
-                <Check className="w-3.5 h-3.5 text-[#0E7C86]" strokeWidth={1.5} />
+                <Check className="w-3.5 h-3.5 text-[#D6FD70]" strokeWidth={2} />
                 <span>Zero sales pressure</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check className="w-3.5 h-3.5 text-[#0E7C86]" strokeWidth={1.5} />
+                <Check className="w-3.5 h-3.5 text-[#D6FD70]" strokeWidth={2} />
                 <span>Survey map verification</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check className="w-3.5 h-3.5 text-[#0E7C86]" strokeWidth={1.5} />
+                <Check className="w-3.5 h-3.5 text-[#D6FD70]" strokeWidth={2} />
                 <span>Price negotiation guidance</span>
               </li>
             </ul>
 
-            {/* Gold CTA Button */}
+            {/* Neon CTA Button */}
             <button
               type="button"
               onClick={() => onNavigate('booking')}
-              className="w-full min-h-[50px] py-3.5 px-6 rounded-xl bg-[#B8893B] hover:bg-[#9E742E] text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+              className="w-full min-h-[50px] py-3.5 px-6 rounded-full bg-[#D6FD70] hover:bg-[#c7f354] text-[#131313] font-bold font-mono text-xs sm:text-sm uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
             >
               <span>Talk to an Advisor about this project</span>
-              <ChevronRight className="w-4 h-4" strokeWidth={1.5} />
+              <ChevronRight className="w-4 h-4 text-[#131313]" strokeWidth={2} />
             </button>
-            <p className="text-center text-[11px] text-stone-400">
+            <p className="text-center text-[11px] text-[#777777] font-mono">
               No phone number asked here · 20-min session
             </p>
           </div>
         </div>
       </div>
 
-      {/* STICKY BOTTOM BAR ON MOBILE (Gold CTA Button) */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 p-3 bg-white border-t border-stone-200 z-40">
+      {/* STICKY BOTTOM BAR ON MOBILE (Neon CTA Button) */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 p-3 bg-[#131313] border-t border-[#2F2F2F] z-40">
         <button
           type="button"
           onClick={() => onNavigate('booking')}
-          className="w-full min-h-[48px] py-3 px-5 rounded-xl bg-[#B8893B] hover:bg-[#9E742E] text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full min-h-[48px] py-3 px-5 rounded-full bg-[#D6FD70] hover:bg-[#c7f354] text-[#131313] font-bold font-mono text-xs sm:text-sm uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md"
         >
-          <PhoneCall className="w-4 h-4" strokeWidth={1.5} />
+          <PhoneCall className="w-4 h-4 text-[#131313]" strokeWidth={2} />
           <span>Talk to an Advisor about this project</span>
         </button>
       </div>

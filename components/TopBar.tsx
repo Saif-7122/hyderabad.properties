@@ -1,166 +1,246 @@
 'use client';
 
 import React from 'react';
-import { Shield, Sparkles, PhoneCall, Search, Home as HomeIcon, CalendarCheck } from 'lucide-react';
+import { 
+  Shield, 
+  Sparkles, 
+  PhoneCall, 
+  Search, 
+  Home as HomeIcon, 
+  CalendarCheck, 
+  Receipt, 
+  Navigation,
+  Bell
+} from 'lucide-react';
+import { AelineButton } from '@/components/AelineButton';
 
-export type ViewType = 'home' | 'check' | 'project' | 'concierge' | 'booking';
+export type ViewType = 'home' | 'check' | 'project' | 'concierge' | 'booking' | 'cost' | 'commute' | 'watching';
 
 interface TopBarProps {
   currentView: ViewType;
   onNavigate: (view: ViewType) => void;
+  watchedCount?: number;
 }
 
-export function TopBar({ currentView, onNavigate }: TopBarProps) {
+export function TopBar({ currentView, onNavigate, watchedCount = 0 }: TopBarProps) {
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#FAF8F5] border-b border-stone-200">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between gap-3">
-        {/* Brand / Logo */}
+    <header className="sticky top-0 z-40 w-full bg-[#F2F2F2]/95 backdrop-blur-md border-b border-[#E2E2E2]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-3">
+        {/* Brand / Logo (hyderabad.properties with Aeline aesthetic) */}
         <button
+          type="button"
           onClick={() => onNavigate('home')}
           className="flex items-center gap-2.5 text-left group min-h-[44px] cursor-pointer"
           aria-label="hyderabad.properties home"
         >
-          <Shield className="w-6 h-6 text-[#0E7C86] shrink-0" strokeWidth={1.5} />
+          <div className="w-8 h-8 rounded-lg bg-[#131313] flex items-center justify-center text-[#D6FD70] shadow-2xs group-hover:scale-105 transition-transform">
+            <Shield className="w-4 h-4 text-[#D6FD70]" strokeWidth={2} />
+          </div>
           <div>
-            <div className="flex items-center gap-1">
-              <span className="font-serif text-lg font-bold tracking-tight text-[#0F1B2D]">
-                hyderabad<span className="text-[#0E7C86]">.properties</span>
+            <div className="flex items-center gap-0.5">
+              <span className="font-heading text-lg sm:text-xl font-extrabold tracking-tight text-[#131313]">
+                hyderabad<span className="text-[#131313] underline decoration-[#D6FD70] decoration-3 underline-offset-4">.properties</span>
               </span>
             </div>
-            <span className="text-[10px] tracking-wider uppercase font-semibold text-stone-500 block -mt-0.5">
-              House of Investors
+            <span className="text-[9px] tracking-widest uppercase font-mono font-bold text-[#888888] block -mt-0.5">
+              House of Investors · Independent Diligence
             </span>
           </div>
         </button>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-1 p-1 rounded-xl bg-stone-100 border border-stone-200">
+        {/* Desktop Navigation (Aeline rounded pill container) */}
+        <nav className="hidden xl:flex items-center gap-1 p-1.5 rounded-full bg-white/90 border border-[#E2E2E2] shadow-2xs">
           <button
+            type="button"
             onClick={() => onNavigate('home')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors min-h-[36px] cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
               currentView === 'home'
-                ? 'bg-white text-[#0F1B2D] font-bold shadow-2xs'
-                : 'text-stone-600 hover:text-[#0F1B2D]'
+                ? 'bg-[#131313] text-white font-bold shadow-xs'
+                : 'text-[#585858] hover:text-[#131313] hover:bg-[#F2F2F2]'
             }`}
           >
             Home
           </button>
+
           <button
+            type="button"
             onClick={() => onNavigate('check')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors min-h-[36px] cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
               currentView === 'check'
-                ? 'bg-white text-[#0F1B2D] font-bold shadow-2xs'
-                : 'text-stone-600 hover:text-[#0F1B2D]'
+                ? 'bg-[#131313] text-white font-bold shadow-xs'
+                : 'text-[#585858] hover:text-[#131313] hover:bg-[#F2F2F2]'
             }`}
           >
             Check a Project
           </button>
+
           <button
+            type="button"
+            onClick={() => onNavigate('commute')}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+              currentView === 'commute'
+                ? 'bg-[#131313] text-white font-bold shadow-xs'
+                : 'text-[#585858] hover:text-[#131313] hover:bg-[#F2F2F2]'
+            }`}
+          >
+            Search by commute
+          </button>
+
+          <button
+            type="button"
             onClick={() => onNavigate('project')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors min-h-[36px] cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
               currentView === 'project'
-                ? 'bg-white text-[#0F1B2D] font-bold shadow-2xs'
-                : 'text-stone-600 hover:text-[#0F1B2D]'
+                ? 'bg-[#131313] text-white font-bold shadow-xs'
+                : 'text-[#585858] hover:text-[#131313] hover:bg-[#F2F2F2]'
             }`}
           >
             Project Report
           </button>
+
           <button
+            type="button"
+            onClick={() => onNavigate('cost')}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+              currentView === 'cost'
+                ? 'bg-[#131313] text-white font-bold shadow-xs'
+                : 'text-[#585858] hover:text-[#131313] hover:bg-[#F2F2F2]'
+            }`}
+          >
+            Cost Calculator
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onNavigate('watching')}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+              currentView === 'watching'
+                ? 'bg-[#131313] text-white font-bold shadow-xs'
+                : 'text-[#585858] hover:text-[#131313] hover:bg-[#F2F2F2]'
+            }`}
+          >
+            <Bell className="w-3.5 h-3.5 text-[#131313]" strokeWidth={1.5} />
+            <span>Watching</span>
+            {watchedCount > 0 && (
+              <span className="px-1.5 py-0.2 bg-[#D6FD70] text-[#131313] rounded-full text-[10px] font-bold">
+                {watchedCount}
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
             onClick={() => onNavigate('concierge')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors min-h-[36px] cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
               currentView === 'concierge'
-                ? 'bg-white text-[#0F1B2D] font-bold shadow-2xs'
-                : 'text-stone-600 hover:text-[#0F1B2D]'
+                ? 'bg-[#131313] text-white font-bold shadow-xs'
+                : 'text-[#585858] hover:text-[#131313] hover:bg-[#F2F2F2]'
             }`}
           >
             Wealth Desk
-          </button>
-          <button
-            onClick={() => onNavigate('booking')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors min-h-[36px] cursor-pointer ${
-              currentView === 'booking'
-                ? 'bg-white text-[#0F1B2D] font-bold shadow-2xs'
-                : 'text-stone-600 hover:text-[#0F1B2D]'
-            }`}
-          >
-            Booking
           </button>
         </nav>
 
         {/* Primary Header CTAs */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Check a Project CTA */}
           <button
+            type="button"
             onClick={() => onNavigate('check')}
-            className={`min-h-[44px] px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors inline-flex items-center gap-2 cursor-pointer ${
-              currentView === 'check'
-                ? 'bg-[#0E7C86] text-white'
-                : 'bg-white hover:bg-stone-50 text-[#0E7C86] border border-[#0E7C86]/40'
-            }`}
+            className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white border border-[#E2E2E2] text-xs font-mono font-semibold uppercase tracking-wider text-[#131313] hover:border-[#131313] transition-colors cursor-pointer"
           >
-            <Search className="w-4 h-4 shrink-0" strokeWidth={1.5} />
-            <span className="hidden sm:inline">Check a Project</span>
-            <span className="sm:hidden">Check</span>
+            <Search className="w-3.5 h-3.5" strokeWidth={1.5} />
+            <span>Check</span>
           </button>
 
-          {/* Talk to an Advisor CTA (Gold accent used strictly for this action) */}
-          <button
-            onClick={() => onNavigate('booking')}
-            className="min-h-[44px] px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-white bg-[#B8893B] hover:bg-[#9E742E] transition-colors inline-flex items-center gap-2 cursor-pointer"
-          >
-            <PhoneCall className="w-4 h-4 shrink-0" strokeWidth={1.5} />
-            <span className="hidden sm:inline">Talk to an Advisor</span>
-            <span className="sm:hidden">Advisor</span>
-          </button>
+          {/* Signature Aeline Volt Green Arrow Button for Advisor Consultation */}
+          <AelineButton variant="lime" onClick={() => onNavigate('booking')}>
+            Talk to an Advisor
+          </AelineButton>
         </div>
       </div>
 
       {/* Mobile Sub-Navigation Bar */}
-      <div className="md:hidden border-t border-stone-200 bg-stone-50 px-2 py-1 flex items-center justify-around text-xs">
+      <div className="xl:hidden border-t border-[#E2E2E2] bg-white px-3 py-2 flex items-center justify-between gap-1 overflow-x-auto text-xs">
         <button
+          type="button"
           onClick={() => onNavigate('home')}
-          className={`flex flex-col items-center py-1 px-2 min-h-[44px] justify-center ${
-            currentView === 'home' ? 'text-[#0E7C86] font-bold' : 'text-stone-600'
+          className={`flex items-center gap-1 py-1 px-3 rounded-full shrink-0 font-mono text-[11px] font-semibold ${
+            currentView === 'home' ? 'bg-[#131313] text-white' : 'text-[#666666]'
           }`}
         >
-          <HomeIcon className="w-4 h-4" strokeWidth={1.5} />
-          <span className="text-[10px]">Home</span>
+          <HomeIcon className="w-3.5 h-3.5" />
+          <span>Home</span>
         </button>
+
         <button
+          type="button"
           onClick={() => onNavigate('check')}
-          className={`flex flex-col items-center py-1 px-2 min-h-[44px] justify-center ${
-            currentView === 'check' ? 'text-[#0E7C86] font-bold' : 'text-stone-600'
+          className={`flex items-center gap-1 py-1 px-3 rounded-full shrink-0 font-mono text-[11px] font-semibold ${
+            currentView === 'check' ? 'bg-[#131313] text-white' : 'text-[#666666]'
           }`}
         >
-          <Search className="w-4 h-4" strokeWidth={1.5} />
-          <span className="text-[10px]">Check</span>
+          <Search className="w-3.5 h-3.5" />
+          <span>Check</span>
         </button>
+
         <button
+          type="button"
+          onClick={() => onNavigate('commute')}
+          className={`flex items-center gap-1 py-1 px-3 rounded-full shrink-0 font-mono text-[11px] font-semibold ${
+            currentView === 'commute' ? 'bg-[#131313] text-white' : 'text-[#666666]'
+          }`}
+        >
+          <Navigation className="w-3.5 h-3.5" />
+          <span>Commute</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => onNavigate('project')}
-          className={`flex flex-col items-center py-1 px-2 min-h-[44px] justify-center ${
-            currentView === 'project' ? 'text-[#0E7C86] font-bold' : 'text-stone-600'
+          className={`flex items-center gap-1 py-1 px-3 rounded-full shrink-0 font-mono text-[11px] font-semibold ${
+            currentView === 'project' ? 'bg-[#131313] text-white' : 'text-[#666666]'
           }`}
         >
-          <Shield className="w-4 h-4" strokeWidth={1.5} />
-          <span className="text-[10px]">Report</span>
+          <Shield className="w-3.5 h-3.5" />
+          <span>Report</span>
         </button>
+
         <button
-          onClick={() => onNavigate('concierge')}
-          className={`flex flex-col items-center py-1 px-2 min-h-[44px] justify-center ${
-            currentView === 'concierge' ? 'text-[#0E7C86] font-bold' : 'text-stone-600'
+          type="button"
+          onClick={() => onNavigate('cost')}
+          className={`flex items-center gap-1 py-1 px-3 rounded-full shrink-0 font-mono text-[11px] font-semibold ${
+            currentView === 'cost' ? 'bg-[#131313] text-white' : 'text-[#666666]'
           }`}
         >
-          <Sparkles className="w-4 h-4" strokeWidth={1.5} />
-          <span className="text-[10px]">Chat</span>
+          <Receipt className="w-3.5 h-3.5" />
+          <span>Cost</span>
         </button>
+
         <button
+          type="button"
+          onClick={() => onNavigate('watching')}
+          className={`flex items-center gap-1 py-1 px-3 rounded-full shrink-0 font-mono text-[11px] font-semibold ${
+            currentView === 'watching' ? 'bg-[#131313] text-white' : 'text-[#666666]'
+          }`}
+        >
+          <Bell className="w-3.5 h-3.5" />
+          <span>Watching</span>
+          {watchedCount > 0 && (
+            <span className="w-4 h-4 rounded-full bg-[#D6FD70] text-[#131313] text-[9px] font-bold flex items-center justify-center">
+              {watchedCount}
+            </span>
+          )}
+        </button>
+
+        <button
+          type="button"
           onClick={() => onNavigate('booking')}
-          className={`flex flex-col items-center py-1 px-2 min-h-[44px] justify-center ${
-            currentView === 'booking' ? 'text-[#B8893B] font-bold' : 'text-stone-600'
+          className={`flex items-center gap-1 py-1 px-3 rounded-full shrink-0 font-mono text-[11px] font-semibold ${
+            currentView === 'booking' ? 'bg-[#D6FD70] text-[#131313]' : 'text-[#666666]'
           }`}
         >
-          <CalendarCheck className="w-4 h-4" strokeWidth={1.5} />
-          <span className="text-[10px]">Book</span>
+          <CalendarCheck className="w-3.5 h-3.5" />
+          <span>Book</span>
         </button>
       </div>
     </header>

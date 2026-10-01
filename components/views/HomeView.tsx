@@ -10,12 +10,16 @@ import {
   Check, 
   RotateCcw,
   Sparkles,
-  ChevronDown
+  ChevronDown,
+  Mail,
+  Send
 } from 'lucide-react';
 import { MOCK_PROJECTS, ProjectSafetyItem } from '@/lib/mock-data';
 import { SafetyBadge } from '@/components/SafetyBadge';
 import { ViewType } from '@/components/TopBar';
 import { UserPreferences } from '@/app/page';
+import { PrivacyPledge } from '@/components/PrivacyPledge';
+import { AelineButton } from '@/components/AelineButton';
 
 interface HomeViewProps {
   onNavigate: (view: ViewType, query?: string) => void;
@@ -34,6 +38,9 @@ export function HomeView({
   const [miniStep, setMiniStep] = useState<'idle' | 1 | 2 | 3 | 'results'>(initialStep);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedMarket, setExpandedMarket] = useState<string | null>(null);
+  const [quizEmail, setQuizEmail] = useState('');
+  const [quizWhatsapp, setQuizWhatsapp] = useState('');
+  const [quizSent, setQuizSent] = useState(false);
 
   const recommendedProjects: ProjectSafetyItem[] = [
     MOCK_PROJECTS[0], // Aurelia Heights (Neopolis) - Green
@@ -95,50 +102,46 @@ export function HomeView({
 
   return (
     <div className="space-y-16 animate-in fade-in duration-200">
-      {/* 1. HERO SECTION (Asymmetric, left-aligned, authoritative) */}
+      {/* 1. HERO SECTION */}
       <section className="pt-4 sm:pt-10 max-w-4xl space-y-4">
-        <div className="text-xs font-bold uppercase tracking-wider text-[#0E7C86]">
-          House of Investors Property Advisory
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#E2E2E2] text-xs font-mono font-semibold tracking-wider uppercase text-[#131313] shadow-2xs">
+          <span className="w-2 h-2 rounded-full bg-[#D6FD70]" />
+          <span>House of Investors · Independent Diligence</span>
         </div>
 
-        <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#0F1B2D] leading-[1.12]">
+        <h1 className="font-heading font-extrabold text-3xl sm:text-5xl lg:text-6xl tracking-tight text-[#131313] leading-[1.12]">
           Know if a property is safe before you fall in love with it.
         </h1>
 
-        <p className="text-base sm:text-lg text-stone-600 font-normal max-w-2xl leading-relaxed">
-          Free, independent checks for Hyderabad buyers. No spam. No broker calls.
+        <p className="text-base sm:text-lg text-[#585858] font-normal max-w-2xl leading-relaxed">
+          Free, independent checks for Hyderabad buyers. No sales commissions. No broker calls.
         </p>
       </section>
 
       {/* 2. ONE PRIMARY CARD (Not sure where to start?) */}
       <section className="max-w-3xl">
         {miniStep === 'idle' && (
-          <div className="bg-white rounded-xl border border-stone-200 p-6 sm:p-10 space-y-6">
+          <div className="bg-white rounded-3xl border border-[#E2E2E2] hover:border-[#131313] transition-all duration-300 p-6 sm:p-10 space-y-6 shadow-sm">
             <div className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#0E7C86]">
-                30-Second Screening
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#666666]">
+                [ 30-SECOND SCREENING ]
               </span>
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#0F1B2D]">
+              <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#131313]">
                 Not sure where to start?
               </h2>
-              <p className="text-sm text-stone-600 max-w-xl">
+              <p className="text-sm text-[#585858] max-w-xl">
                 Answer 3 quick questions. We will highlight the safest verified properties that match your budget and location.
               </p>
             </div>
 
-            {/* Big teal button */}
+            {/* Aeline Signature Volt Green Pill Button */}
             <div>
-              <button
-                type="button"
-                onClick={() => setMiniStep(1)}
-                className="w-full sm:w-auto min-h-[52px] px-8 py-3.5 rounded-xl bg-[#0E7C86] hover:bg-[#095961] text-white text-base font-semibold transition-colors inline-flex items-center justify-center gap-3 cursor-pointer"
-              >
-                <span>Answer 3 quick questions</span>
-                <ArrowRight className="w-5 h-5" strokeWidth={1.5} />
-              </button>
+              <AelineButton variant="lime" onClick={() => setMiniStep(1)}>
+                Answer 3 quick questions
+              </AelineButton>
             </div>
 
-            <div className="text-xs text-stone-500 pt-2 border-t border-stone-100">
+            <div className="text-xs font-mono text-[#888888] pt-2 border-t border-[#E2E2E2]">
               No phone number required to browse vetted projects.
             </div>
           </div>
@@ -162,9 +165,9 @@ export function HomeView({
             </div>
 
             {/* Step progress bar */}
-            <div className="h-1 w-full bg-stone-100 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-stone-200 rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#0E7C86] transition-all duration-200"
+                className="h-full bg-[#D6FD70] transition-all duration-200"
                 style={{ width: `${(miniStep / 3) * 100}%` }}
               />
             </div>
@@ -193,7 +196,7 @@ export function HomeView({
                       onClick={() => handleSelectLookingFor(opt.label as UserPreferences['lookingFor'])}
                       className={`min-h-[58px] p-4 text-left rounded-xl border transition-colors cursor-pointer flex items-center justify-between ${
                         userPreferences.lookingFor === opt.label
-                          ? 'border-[#0E7C86] bg-white ring-2 ring-[#0E7C86]'
+                          ? 'border-[#131313] bg-white ring-2 ring-[#D6FD70]'
                           : 'border-stone-200 hover:border-stone-300 bg-white'
                       }`}
                     >
@@ -234,7 +237,7 @@ export function HomeView({
                       onClick={() => handleSelectLocation(opt.label as UserPreferences['location'])}
                       className={`min-h-[58px] p-4 text-left rounded-xl border transition-colors cursor-pointer flex items-center justify-between ${
                         userPreferences.location === opt.label
-                          ? 'border-[#0E7C86] bg-white ring-2 ring-[#0E7C86]'
+                          ? 'border-[#131313] bg-white ring-2 ring-[#D6FD70]'
                           : 'border-stone-200 hover:border-stone-300 bg-white'
                       }`}
                     >
@@ -285,7 +288,7 @@ export function HomeView({
                       onClick={() => handleSelectTimeline(opt.label as UserPreferences['timeline'])}
                       className={`min-h-[58px] p-4 text-left rounded-xl border transition-colors cursor-pointer flex items-center justify-between ${
                         userPreferences.timeline === opt.label
-                          ? 'border-[#0E7C86] bg-white ring-2 ring-[#0E7C86]'
+                          ? 'border-[#131313] bg-white ring-2 ring-[#D6FD70]'
                           : 'border-stone-200 hover:border-stone-300 bg-white'
                       }`}
                     >
@@ -351,13 +354,13 @@ export function HomeView({
 
             {/* NRI Banner */}
             {userPreferences.location === 'Abroad (NRI)' && (
-              <div className="bg-[#FAF4EB] border border-[#B8893B]/40 rounded-xl p-4 sm:p-5 flex items-start gap-3 text-xs">
-                <Globe className="w-5 h-5 text-[#B8893B] shrink-0 mt-0.5" strokeWidth={1.5} />
+              <div className="bg-[#131313] text-white border border-[#2F2F2F] rounded-2xl p-4 sm:p-5 flex items-start gap-3 text-xs">
+                <Globe className="w-5 h-5 text-[#D6FD70] shrink-0 mt-0.5" strokeWidth={1.5} />
                 <div className="space-y-1">
-                  <p className="font-bold text-[#0F1B2D] text-sm">
+                  <p className="font-bold text-[#D6FD70] text-sm">
                     Buying from abroad? We handle checks and paperwork remotely.
                   </p>
-                  <p className="text-stone-600 leading-relaxed">
+                  <p className="text-[#AAAAAA] leading-relaxed">
                     House of Investors provides NRI buyers with independent remote title checks, Power of Attorney compliance verification, and site video audits without requiring travel.
                   </p>
                 </div>
@@ -395,14 +398,82 @@ export function HomeView({
                         onSelectProject(project);
                         onNavigate('project');
                       }}
-                      className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-xl bg-[#0E7C86] hover:bg-[#095961] text-white text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-full bg-[#131313] hover:bg-black text-[#D6FD70] text-xs sm:text-sm font-bold font-mono uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
                     >
                       <span>See safety check</span>
-                      <ChevronRight className="w-4 h-4" strokeWidth={1.5} />
+                      <ChevronRight className="w-4 h-4 text-[#D6FD70]" strokeWidth={2} />
                     </button>
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Quiz contact step: optional shortlist dispatch with PrivacyPledge */}
+            <div className="bg-stone-50 border border-stone-200 rounded-xl p-5 space-y-4">
+              <div className="space-y-1">
+                <h4 className="font-serif font-bold text-base text-[#0F1B2D]">
+                  Email this verified shortlist to me <span className="font-sans text-xs text-stone-500 font-normal">(optional)</span>
+                </h4>
+                <p className="text-xs text-stone-600">
+                  Receive full link documents, survey numbers, and sanction orders in your inbox.
+                </p>
+              </div>
+
+              {!quizSent ? (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (quizEmail.trim() && quizEmail.includes('@')) {
+                      setQuizSent(true);
+                    }
+                  }}
+                  className="space-y-3"
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-[#0F1B2D] mb-1">
+                        Email address <span className="text-stone-400 font-normal">(optional unless sending)</span>
+                      </label>
+                      <input
+                        type="email"
+                        value={quizEmail}
+                        onChange={(e) => setQuizEmail(e.target.value)}
+                        placeholder="yourname@domain.com"
+                        className="w-full px-3 py-2.5 rounded-xl border border-stone-200 bg-white text-xs sm:text-sm focus:outline-none focus:border-[#0E7C86] min-h-[44px]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-[#0F1B2D] mb-1">
+                        WhatsApp number <span className="text-stone-400 font-normal">(optional)</span>
+                      </label>
+                      <input
+                        type="tel"
+                        value={quizWhatsapp}
+                        onChange={(e) => setQuizWhatsapp(e.target.value)}
+                        placeholder="+91 98765 43210 (optional)"
+                        className="w-full px-3 py-2.5 rounded-xl border border-stone-200 bg-white text-xs sm:text-sm focus:outline-none focus:border-[#0E7C86] min-h-[44px]"
+                      />
+                    </div>
+                  </div>
+
+                  <PrivacyPledge compact />
+
+                  <button
+                    type="submit"
+                    disabled={!quizEmail.trim() || !quizEmail.includes('@')}
+                    className="px-6 py-2.5 rounded-full bg-[#D6FD70] hover:bg-[#c7f354] text-[#131313] text-xs font-bold font-mono uppercase tracking-wider transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+                  >
+                    <span>Send me the shortlist</span>
+                    <Send className="w-3.5 h-3.5" strokeWidth={2} />
+                  </button>
+                </form>
+              ) : (
+                <div className="p-3 bg-white rounded-lg border border-stone-200 text-xs text-stone-700 flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0" strokeWidth={1.5} />
+                  <span>Shortlist sent to <strong>{quizEmail}</strong>. No spam, ever.</span>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -471,7 +542,7 @@ export function HomeView({
                       </span>
                     </div>
 
-                    <div className="text-sm font-bold text-[#0E7C86] mt-1">
+                    <div className="text-sm font-bold text-[#131313] mt-1">
                       {market.rates}
                       <span className="text-xs font-normal text-stone-500"> / sq ft</span>
                     </div>
@@ -486,10 +557,10 @@ export function HomeView({
                     <button
                       type="button"
                       onClick={() => setExpandedMarket(isExpanded ? null : market.id)}
-                      className="w-full text-left text-xs font-semibold text-[#0E7C86] hover:text-[#095961] flex items-center justify-between py-1 min-h-[36px] cursor-pointer"
+                      className="w-full text-left text-xs font-semibold text-[#131313] hover:text-[#585858] flex items-center justify-between py-1 min-h-[36px] cursor-pointer"
                     >
                       <span className="flex items-center gap-1.5">
-                        <HelpCircle className="w-3.5 h-3.5 text-[#0E7C86]" strokeWidth={1.5} />
+                        <HelpCircle className="w-3.5 h-3.5 text-[#131313]" strokeWidth={1.5} />
                         <span>What&apos;s this area like?</span>
                       </span>
                       <ChevronDown

@@ -12,6 +12,7 @@ import {
 import { ProjectSafetyItem } from '@/lib/mock-data';
 import { ViewType } from '@/components/TopBar';
 import { UserPreferences } from '@/app/page';
+import { PrivacyPledge } from '@/components/PrivacyPledge';
 
 interface ConciergeViewProps {
   onNavigate: (view: ViewType) => void;
@@ -240,13 +241,13 @@ export function ConciergeView({
         <div className="flex items-center gap-3">
           {/* Human Advisor Avatar Group */}
           <div className="flex -space-x-2 overflow-hidden">
-            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#0E7C86] text-white text-[10px] font-bold ring-2 ring-white">
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#131313] text-[#D6FD70] text-[10px] font-bold ring-2 ring-white">
               AN
             </span>
-            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#B8893B] text-white text-[10px] font-bold ring-2 ring-white">
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#131313] text-[#D6FD70] text-[10px] font-bold ring-2 ring-white">
               VK
             </span>
-            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-700 text-white text-[10px] font-bold ring-2 ring-white">
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#131313] text-[#D6FD70] text-[10px] font-bold ring-2 ring-white">
               PR
             </span>
           </div>
@@ -292,7 +293,7 @@ export function ConciergeView({
               <div
                 className={`max-w-[85%] sm:max-w-[80%] rounded-xl p-4 text-xs sm:text-sm leading-relaxed whitespace-pre-line text-left ${
                   msg.sender === 'user'
-                    ? 'bg-[#0E7C86] text-white'
+                    ? 'bg-[#131313] text-[#D6FD70] font-mono'
                     : 'bg-[#FAF8F5] text-stone-800 border border-stone-200'
                 }`}
               >
@@ -305,64 +306,66 @@ export function ConciergeView({
 
               {/* SUMMARY CARD AT THE END */}
               {msg.isSummary && (
-                <div className="w-full mt-4 p-5 rounded-xl bg-[#FAF8F5] border border-[#B8893B] space-y-4 text-left animate-in fade-in duration-200">
+                <div className="w-full mt-4 p-5 rounded-2xl bg-[#131313] text-white border border-[#2F2F2F] space-y-4 text-left animate-in fade-in duration-200 shadow-xl">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <FileCheck className="w-4 h-4 text-[#B8893B]" strokeWidth={1.5} />
-                      <h3 className="font-serif font-bold text-base text-[#0F1B2D]">
+                      <FileCheck className="w-4 h-4 text-[#D6FD70]" strokeWidth={2} />
+                      <h3 className="font-heading font-extrabold text-base text-white">
                         Your Summary
                       </h3>
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[11px] text-stone-500 font-medium">Priority:</span>
-                      <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold border ${getLeadTemperature().color}`}>
+                      <span className="text-[11px] text-[#AAAAAA] font-mono">Priority:</span>
+                      <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold border font-mono ${getLeadTemperature().color}`}>
                         {getLeadTemperature().label}
                       </span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-xs bg-white p-3 rounded-lg border border-stone-200">
+                  <div className="grid grid-cols-2 gap-2 text-xs bg-[#1F1F1F] p-3 rounded-xl border border-[#2F2F2F]">
                     <div>
-                      <span className="text-stone-400 block text-[10px] uppercase font-semibold">Project</span>
-                      <strong className="text-[#0F1B2D]">{selectedProject.name}</strong>
+                      <span className="text-[#888888] block text-[10px] uppercase font-mono font-semibold">Project</span>
+                      <strong className="text-white">{selectedProject.name}</strong>
                     </div>
                     <div>
-                      <span className="text-stone-400 block text-[10px] uppercase font-semibold">Budget</span>
-                      <strong className="text-[#0F1B2D]">{budgetAnswer || '₹1 Cr – ₹2.5 Cr'}</strong>
+                      <span className="text-[#888888] block text-[10px] uppercase font-mono font-semibold">Budget</span>
+                      <strong className="text-[#D6FD70]">{budgetAnswer || '₹1 Cr – ₹2.5 Cr'}</strong>
                     </div>
                     <div>
-                      <span className="text-stone-400 block text-[10px] uppercase font-semibold">Purpose</span>
-                      <strong className="text-[#0F1B2D]">{purposeAnswer || 'Live / Invest'}</strong>
+                      <span className="text-[#888888] block text-[10px] uppercase font-mono font-semibold">Purpose</span>
+                      <strong className="text-white">{purposeAnswer || 'Live / Invest'}</strong>
                     </div>
                     <div>
-                      <span className="text-stone-400 block text-[10px] uppercase font-semibold">Timeline</span>
-                      <strong className="text-[#0F1B2D]">{timelineAnswer || 'Within 6 months'}</strong>
+                      <span className="text-[#888888] block text-[10px] uppercase font-mono font-semibold">Timeline</span>
+                      <strong className="text-white">{timelineAnswer || 'Within 6 months'}</strong>
                     </div>
                     <div>
-                      <span className="text-stone-400 block text-[10px] uppercase font-semibold">NRI Status</span>
-                      <strong className="text-[#0F1B2D]">{isNRI ? 'Yes (Overseas)' : 'No (Resident)'}</strong>
+                      <span className="text-[#888888] block text-[10px] uppercase font-mono font-semibold">NRI Status</span>
+                      <strong className="text-white">{isNRI ? 'Yes (Overseas)' : 'No (Resident)'}</strong>
                     </div>
                     {browsingFocus && (
                       <div>
-                        <span className="text-stone-400 block text-[10px] uppercase font-semibold">Focus</span>
-                        <strong className="text-[#0F1B2D]">{browsingFocus}</strong>
+                        <span className="text-[#888888] block text-[10px] uppercase font-mono font-semibold">Focus</span>
+                        <strong className="text-white">{browsingFocus}</strong>
                       </div>
                     )}
                   </div>
 
-                  <p className="text-xs text-stone-500">
+                  <p className="text-xs text-[#AAAAAA] font-sans">
                     Your advisor will see this so you never repeat yourself.
                   </p>
+
+                  <PrivacyPledge compact />
 
                   <button
                     type="button"
                     onClick={() => onNavigate('booking')}
-                    className="w-full min-h-[50px] py-3.5 px-6 rounded-xl bg-[#B8893B] hover:bg-[#9E742E] text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full min-h-[50px] py-3.5 px-6 rounded-full bg-[#D6FD70] hover:bg-[#c7f354] text-[#131313] font-bold font-mono text-xs sm:text-sm uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                   >
-                    <PhoneCall className="w-4 h-4" strokeWidth={1.5} />
+                    <PhoneCall className="w-4 h-4 text-[#131313]" strokeWidth={2} />
                     <span>Book a free advisor call</span>
-                    <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
+                    <ArrowRight className="w-4 h-4 text-[#131313]" strokeWidth={2} />
                   </button>
                 </div>
               )}
@@ -417,9 +420,9 @@ export function ConciergeView({
           <button
             type="submit"
             disabled={!inputText.trim() || isTyping}
-            className="px-4 py-3 rounded-xl bg-[#0E7C86] hover:bg-[#095961] text-white text-xs font-semibold min-h-[44px] flex items-center justify-center transition-colors cursor-pointer disabled:opacity-40"
+            className="px-5 py-3 rounded-full bg-[#D6FD70] hover:bg-[#c7f354] text-[#131313] text-xs font-bold font-mono min-h-[44px] flex items-center justify-center transition-colors cursor-pointer disabled:opacity-40 shadow-xs"
           >
-            <Send className="w-4 h-4" strokeWidth={1.5} />
+            <Send className="w-4 h-4 text-[#131313]" strokeWidth={2} />
           </button>
         </form>
       </div>

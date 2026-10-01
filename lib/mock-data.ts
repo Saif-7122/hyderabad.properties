@@ -207,3 +207,86 @@ export const JARGON_DICTIONARY: Record<string, { term: string; explanation: stri
 };
 
 export const FOOTER_DISCLAIMER = 'Informational only. Verify with a qualified professional.';
+
+export type WorkLocation = 
+  | 'Hitec City' 
+  | 'Financial District' 
+  | 'Gachibowli' 
+  | 'Madhapur' 
+  | 'Kokapet' 
+  | 'Somajiguda' 
+  | 'Other';
+
+export const WORK_LOCATIONS: WorkLocation[] = [
+  'Hitec City',
+  'Financial District',
+  'Gachibowli',
+  'Madhapur',
+  'Kokapet',
+  'Somajiguda',
+  'Other',
+];
+
+export interface CommuteEstimate {
+  rushMinutes: number;
+  offPeakMinutes: number;
+}
+
+export type CommuteMatrix = Record<string, Record<WorkLocation, CommuteEstimate>>;
+
+export const MOCK_COMMUTE_MATRIX: CommuteMatrix = {
+  'aurelia-heights': {
+    'Hitec City': { rushMinutes: 28, offPeakMinutes: 18 },
+    'Financial District': { rushMinutes: 14, offPeakMinutes: 8 },
+    'Gachibowli': { rushMinutes: 19, offPeakMinutes: 12 },
+    'Madhapur': { rushMinutes: 31, offPeakMinutes: 21 },
+    'Kokapet': { rushMinutes: 9, offPeakMinutes: 6 },
+    'Somajiguda': { rushMinutes: 54, offPeakMinutes: 36 },
+    'Other': { rushMinutes: 35, offPeakMinutes: 24 },
+  },
+  'lakeview-residency': {
+    'Hitec City': { rushMinutes: 34, offPeakMinutes: 22 },
+    'Financial District': { rushMinutes: 18, offPeakMinutes: 11 },
+    'Gachibowli': { rushMinutes: 21, offPeakMinutes: 13 },
+    'Madhapur': { rushMinutes: 38, offPeakMinutes: 24 },
+    'Kokapet': { rushMinutes: 12, offPeakMinutes: 7 },
+    'Somajiguda': { rushMinutes: 48, offPeakMinutes: 32 },
+    'Other': { rushMinutes: 38, offPeakMinutes: 25 },
+  },
+  'skyline-crest': {
+    'Hitec City': { rushMinutes: 22, offPeakMinutes: 14 },
+    'Financial District': { rushMinutes: 6, offPeakMinutes: 4 },
+    'Gachibowli': { rushMinutes: 11, offPeakMinutes: 7 },
+    'Madhapur': { rushMinutes: 26, offPeakMinutes: 16 },
+    'Kokapet': { rushMinutes: 13, offPeakMinutes: 8 },
+    'Somajiguda': { rushMinutes: 49, offPeakMinutes: 33 },
+    'Other': { rushMinutes: 32, offPeakMinutes: 20 },
+  },
+  'banyan-park': {
+    'Hitec City': { rushMinutes: 29, offPeakMinutes: 19 },
+    'Financial District': { rushMinutes: 13, offPeakMinutes: 8 },
+    'Gachibowli': { rushMinutes: 17, offPeakMinutes: 10 },
+    'Madhapur': { rushMinutes: 32, offPeakMinutes: 22 },
+    'Kokapet': { rushMinutes: 4, offPeakMinutes: 3 },
+    'Somajiguda': { rushMinutes: 52, offPeakMinutes: 35 },
+    'Other': { rushMinutes: 36, offPeakMinutes: 23 },
+  },
+  'marina-greens': {
+    'Hitec City': { rushMinutes: 26, offPeakMinutes: 17 },
+    'Financial District': { rushMinutes: 44, offPeakMinutes: 28 },
+    'Gachibowli': { rushMinutes: 36, offPeakMinutes: 24 },
+    'Madhapur': { rushMinutes: 23, offPeakMinutes: 15 },
+    'Kokapet': { rushMinutes: 47, offPeakMinutes: 31 },
+    'Somajiguda': { rushMinutes: 39, offPeakMinutes: 26 },
+    'Other': { rushMinutes: 41, offPeakMinutes: 27 },
+  },
+  'orchid-terraces': {
+    'Hitec City': { rushMinutes: 68, offPeakMinutes: 46 },
+    'Financial District': { rushMinutes: 74, offPeakMinutes: 51 },
+    'Gachibowli': { rushMinutes: 71, offPeakMinutes: 49 },
+    'Madhapur': { rushMinutes: 66, offPeakMinutes: 44 },
+    'Kokapet': { rushMinutes: 79, offPeakMinutes: 54 },
+    'Somajiguda': { rushMinutes: 33, offPeakMinutes: 21 },
+    'Other': { rushMinutes: 50, offPeakMinutes: 34 },
+  },
+};

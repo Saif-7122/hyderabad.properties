@@ -105,7 +105,7 @@ export function AdvisorDemoPanel({
               </div>
               <div>
                 <span className="text-stone-400 block text-[10px]">Buyer Residency:</span>
-                <span className="font-semibold text-[#0E7C86]">
+                <span className="font-semibold text-[#131313]">
                   {userPreferences.location === 'Abroad (NRI)' ? 'NRI (Overseas Buyer)' : 'Domestic / Hyderabad'}
                 </span>
               </div>
@@ -133,7 +133,7 @@ export function AdvisorDemoPanel({
               </div>
               <div className="flex justify-between pb-1">
                 <span className="text-stone-500">Active Inquiry:</span>
-                <strong className="text-[#0E7C86]">{selectedProject.name}</strong>
+                <strong className="text-[#131313]">{selectedProject.name}</strong>
               </div>
             </div>
           </div>
