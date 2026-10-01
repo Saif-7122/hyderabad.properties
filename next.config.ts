@@ -20,6 +20,12 @@ const nextConfig: NextConfig = {
     ],
   },
   output: 'standalone',
+  // Embedded Postgres (PGlite) ships WASM and must not be bundled.
+  serverExternalPackages: ['@electric-sql/pglite', 'postgres', 'unpdf'],
+  // SQL migrations are read at runtime; make sure they ship with the standalone build.
+  outputFileTracingIncludes: {
+    '/**': ['./drizzle/**/*'],
+  },
   transpilePackages: ['motion'],
   webpack: (config, {dev}) => {
     // HMR is disabled in AI Studio via DISABLE_HMR env var.

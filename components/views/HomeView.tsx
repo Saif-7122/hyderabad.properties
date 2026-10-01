@@ -14,10 +14,11 @@ import {
   Mail,
   Send
 } from 'lucide-react';
-import { MOCK_PROJECTS, ProjectSafetyItem } from '@/lib/mock-data';
+import { ProjectSafetyItem } from '@/lib/mock-data';
+import { useLiveData } from '@/components/live/LiveDataProvider';
 import { SafetyBadge } from '@/components/SafetyBadge';
 import { ViewType } from '@/components/TopBar';
-import { UserPreferences } from '@/app/page';
+import { UserPreferences } from '@/components/AppShell';
 import { PrivacyPledge } from '@/components/PrivacyPledge';
 import { AelineButton } from '@/components/AelineButton';
 
@@ -42,11 +43,13 @@ export function HomeView({
   const [quizWhatsapp, setQuizWhatsapp] = useState('');
   const [quizSent, setQuizSent] = useState(false);
 
-  const recommendedProjects: ProjectSafetyItem[] = [
-    MOCK_PROJECTS[0], // Aurelia Heights (Neopolis) - Green
-    MOCK_PROJECTS[2], // Skyline Crest (Financial District) - Green
-    MOCK_PROJECTS[3], // Banyan Park (Kokapet) - Amber
-  ];
+  const { projects, getProject } = useLiveData();
+  const featured = ['aurelia-heights', 'skyline-crest', 'banyan-park']
+    .map((id) => getProject(id))
+    .filter(Boolean) as ProjectSafetyItem[];
+  const recommendedProjects: ProjectSafetyItem[] = featured.length === 3
+    ? featured
+    : projects.filter((p) => p.status !== 'risk').slice(0, 3);
 
   const microMarketInsights = [
     {

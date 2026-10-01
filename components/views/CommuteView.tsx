@@ -15,14 +15,14 @@ import {
   Navigation
 } from 'lucide-react';
 import { ViewType } from '@/components/TopBar';
-import { 
-  MOCK_PROJECTS, 
+import {
   ProjectSafetyItem, 
   WORK_LOCATIONS, 
   WorkLocation, 
   MOCK_COMMUTE_MATRIX 
 } from '@/lib/mock-data';
 import { SafetyBadge } from '@/components/SafetyBadge';
+import { useLiveData } from '@/components/live/LiveDataProvider';
 
 interface CommuteViewProps {
   onNavigate: (view: ViewType) => void;
@@ -30,6 +30,7 @@ interface CommuteViewProps {
 }
 
 export function CommuteView({ onNavigate, onSelectProject }: CommuteViewProps) {
+  const { projects: liveProjects, marketFor } = useLiveData();
   // Step indicator state (1: Workplace, 2: Commute duration, 3: Results)
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
 
@@ -45,7 +46,7 @@ export function CommuteView({ onNavigate, onSelectProject }: CommuteViewProps) {
   // Filtered and sorted projects
   const commuteResults = useMemo(() => {
     // RED STATUS PROJECTS NEVER APPEAR HERE
-    const eligibleProjects = MOCK_PROJECTS.filter((p) => {
+    const eligibleProjects = liveProjects.filter((p) => {
       if (p.status === 'risk') return false; // Red-status never shown
       if (!includeWarningProjects && p.status === 'warning') return false; // Amber only if toggled on
       return true;
@@ -75,7 +76,7 @@ export function CommuteView({ onNavigate, onSelectProject }: CommuteViewProps) {
       matching,
       allEligibleWithTimes: withTimes.sort((a, b) => a.duration - b.duration),
     };
-  }, [selectedWorkplace, maxCommuteMinutes, trafficMode, includeWarningProjects]);
+  }, [liveProjects, selectedWorkplace, maxCommuteMinutes, trafficMode, includeWarningProjects]);
 
   // Nearest project if empty
   const nearestResult = useMemo(() => {
@@ -600,6 +601,28 @@ export function CommuteView({ onNavigate, onSelectProject }: CommuteViewProps) {
                         <span>·</span>
                         <span className="text-stone-500">{project.config}</span>
                       </div>
+
+                      {(() => {
+                        const m = marketFor(project);
+                        const guideline = m?.guidelineRatePerSqFt;
+                        return (
+                          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                            <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#131313] text-[#D6FD70]">
+                              ₹{project.ratePerSqFt.toLocaleString('en-IN')} / sq ft
+                            </span>
+                            {guideline ? (
+                              <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#F2F2F2] border border-[#E2E2E2] text-[#585858]">
+                                IGR guideline ₹{guideline.toLocaleString('en-IN')}
+                              </span>
+                            ) : null}
+                            {m ? (
+                              <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#F2F2F2] border border-[#E2E2E2] text-[#585858]">
+                                Area ₹{m.minRate.toLocaleString('en-IN')} to ₹{m.maxRate.toLocaleString('en-IN')}
+                              </span>
+                            ) : null}
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     <div className="shrink-0 flex items-center gap-2 pt-2 sm:pt-0">

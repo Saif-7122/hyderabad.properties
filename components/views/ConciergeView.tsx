@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { ProjectSafetyItem } from '@/lib/mock-data';
 import { ViewType } from '@/components/TopBar';
-import { UserPreferences } from '@/app/page';
+import { UserPreferences } from '@/components/AppShell';
 import { PrivacyPledge } from '@/components/PrivacyPledge';
 
 interface ConciergeViewProps {

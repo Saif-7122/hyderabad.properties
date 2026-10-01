@@ -22,7 +22,8 @@ import {
   Receipt,
   Trash2
 } from 'lucide-react';
-import { MOCK_PROJECTS, MICRO_MARKETS, ProjectSafetyItem } from '@/lib/mock-data';
+import { MICRO_MARKETS, MicroMarketLive, ProjectSafetyItem } from '@/lib/mock-data';
+import { useLiveData, formatDate } from '@/components/live/LiveDataProvider';
 import { SafetyBadge } from '@/components/SafetyBadge';
 import { JargonTooltip } from '@/components/JargonTooltip';
 import { ViewType } from '@/components/TopBar';
@@ -64,7 +65,11 @@ export function ProjectView({
   const [uploadSubmitted, setUploadSubmitted] = useState(false);
 
   // Micro-market calculations
-  const market = MICRO_MARKETS.find((m) => m.name.toLowerCase().includes(project.location.toLowerCase()) || project.microMarket.includes(m.name)) || MICRO_MARKETS[0];
+  const { projects: liveProjects, marketFor, alertsFor } = useLiveData();
+  const market: MicroMarketLive = marketFor(project) ?? MICRO_MARKETS[0];
+  const projectAlerts = alertsFor(project.id);
+  const [showAllUpdates, setShowAllUpdates] = useState(false);
+  const reraExpired = !!project.reraValidUntil && project.reraValidUntil < new Date().toISOString().slice(0, 10);
   const areaAvgRate = Math.round((market.minRate + market.maxRate) / 2);
   const rateDiffPercent = Math.round(((project.ratePerSqFt - areaAvgRate) / areaAvgRate) * 100);
 
@@ -132,7 +137,7 @@ export function ProjectView({
           Viewing Project Audit:
         </span>
         <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
-          {MOCK_PROJECTS.map((p) => (
+          {liveProjects.map((p) => (
             <button
               key={p.id}
               onClick={() => onSelectProject(p)}
@@ -163,6 +168,11 @@ export function ProjectView({
             </div>
             <div className="text-[11px] font-mono text-stone-500">
               RERA: {project.reraNumber}
+              {project.reraValidUntil && (
+                <span className={reraExpired ? 'text-rose-700 font-semibold' : ''}>
+                  {' '}· Valid until {formatDate(project.reraValidUntil)}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -241,6 +251,55 @@ export function ProjectView({
           </div>
         </div>
       </header>
+
+      {/* LIVE REGULATORY UPDATES */}
+      {projectAlerts.length > 0 && (
+        <section
+          aria-label="Recent regulatory updates"
+          className="bg-[#131313] text-white rounded-2xl p-5 sm:p-6 space-y-3 animate-in fade-in duration-200"
+        >
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest font-bold text-[#D6FD70]">
+              <span className="w-2 h-2 rounded-full bg-[#D6FD70] animate-pulse" />
+              <span>Notice verified on {formatDate(projectAlerts[0].publishedAt)}</span>
+            </div>
+            <span className="font-mono text-[11px] uppercase tracking-wider text-[#AAAAAA]">
+              Last verified {project.lastVerifiedDate}
+            </span>
+          </div>
+          <div className="space-y-1.5">
+            <span className="inline-block font-mono text-[10px] uppercase tracking-wider font-bold px-2.5 py-0.5 rounded-full bg-[#D6FD70] text-[#131313]">
+              {projectAlerts[0].type}
+            </span>
+            <p className="text-sm sm:text-base font-semibold leading-relaxed">{projectAlerts[0].whatChanged}</p>
+            <p className="text-xs sm:text-sm text-[#CFCFCF] leading-relaxed">{projectAlerts[0].whatItMeans}</p>
+          </div>
+          {projectAlerts.length > 1 && (
+            <div className="pt-2 border-t border-[#2F2F2F]">
+              <button
+                type="button"
+                onClick={() => setShowAllUpdates(!showAllUpdates)}
+                className="font-mono text-[11px] uppercase tracking-wider font-bold text-[#D6FD70] hover:text-white inline-flex items-center gap-1 py-1 cursor-pointer"
+              >
+                <span>{showAllUpdates ? 'Hide earlier updates' : `Earlier updates (${projectAlerts.length - 1})`}</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showAllUpdates ? 'rotate-180' : ''}`} strokeWidth={2} />
+              </button>
+              {showAllUpdates && (
+                <ul className="mt-2 space-y-2.5">
+                  {projectAlerts.slice(1, 8).map((a) => (
+                    <li key={a.id} className="text-xs leading-relaxed">
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-[#AAAAAA]">
+                        {formatDate(a.publishedAt)} · {a.type}
+                      </span>
+                      <p className="text-[#E2E2E2]">{a.whatChanged}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* RED-STATUS WARNING CARD */}
       {project.status === 'risk' && (
@@ -355,10 +414,30 @@ export function ProjectView({
                 </div>
 
                 <p className="text-xs sm:text-sm text-stone-600 leading-relaxed pl-7">
-                  {project.reraStatus === 'Active'
+                  {project.reraStatus === 'Active' && reraExpired
+                    ? `Registered under TG-RERA No: ${project.reraNumber}, but the registration validity ended on ${formatDate(project.reraValidUntil)}. Ask for the extension order.`
+                    : project.reraStatus === 'Active'
                     ? `Registered under TG-RERA No: ${project.reraNumber}. Escrow bank deposits and quarterly disclosures are up to date.`
                     : `Registration application renewal is currently processing. No active final certificate publicly listed on the portal.`}
                 </p>
+
+                <div className="pl-7 flex flex-wrap gap-1.5">
+                  {project.reraValidUntil && (
+                    <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#F2F2F2] border border-[#E2E2E2] text-[#131313]">
+                      Valid until {formatDate(project.reraValidUntil)}
+                    </span>
+                  )}
+                  {project.lastQprFiled && (
+                    <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#F2F2F2] border border-[#E2E2E2] text-[#131313]">
+                      Last QPR {project.lastQprFiled}
+                    </span>
+                  )}
+                  {project.escrowAccount && (
+                    <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#F2F2F2] border border-[#E2E2E2] text-[#131313]">
+                      {project.escrowAccount}
+                    </span>
+                  )}
+                </div>
 
                 <div className="pl-7 pt-1">
                   <button
@@ -405,9 +484,32 @@ export function ProjectView({
 
                 <p className="text-xs sm:text-sm text-stone-600 leading-relaxed pl-7">
                   {project.buildingPlan === 'Approved'
-                    ? 'Town planning permissions and structural safety clearances approved for the entire master layout.'
+                    ? `Town planning permissions and structural safety clearances approved for the entire master layout${project.sanctionedConfig ? `, sanctioned at ${project.sanctionedConfig}` : ''}.`
                     : 'The developer has applied for an additional floor permission amendment that is pending civic sign-off.'}
                 </p>
+
+                <div className="pl-7 flex flex-wrap gap-1.5">
+                  {project.sanctionedConfig && (
+                    <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#F2F2F2] border border-[#E2E2E2] text-[#131313]">
+                      Sanctioned {project.sanctionedConfig}
+                    </span>
+                  )}
+                  {!!project.sanctionedFloors && (
+                    <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#F2F2F2] border border-[#E2E2E2] text-[#131313]">
+                      {project.sanctionedFloors} floors
+                    </span>
+                  )}
+                  {project.permitNo && (
+                    <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#F2F2F2] border border-[#E2E2E2] text-[#131313]">
+                      Permit {project.permitNo}
+                    </span>
+                  )}
+                  {project.ocStatus && (
+                    <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#F2F2F2] border border-[#E2E2E2] text-[#131313]">
+                      OC {project.ocStatus}
+                    </span>
+                  )}
+                </div>
 
                 <div className="pl-7 pt-1">
                   <button
@@ -457,6 +559,19 @@ export function ProjectView({
                     ? 'Plot boundaries sit outside the mandatory 30-meter buffer line and irrigation channels.'
                     : 'Portions of the project boundary lie inside the lake buffer zone flagged under recent HYDRAA enforcement.'}
                 </p>
+
+                <div className="pl-7 flex flex-wrap gap-1.5">
+                  {project.nearestLakeMeters != null && (
+                    <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#F2F2F2] border border-[#E2E2E2] text-[#131313]">
+                      Nearest FTL edge {project.nearestLakeMeters} m
+                    </span>
+                  )}
+                  {project.surveyNumbers && (
+                    <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#F2F2F2] border border-[#E2E2E2] text-[#131313]">
+                      {project.surveyNumbers}
+                    </span>
+                  )}
+                </div>
 
                 <div className="pl-7 pt-1">
                   <button
@@ -657,8 +772,18 @@ export function ProjectView({
                 </div>
               </div>
 
+              {market.guidelineRatePerSqFt ? (
+                <div className="flex items-center justify-between gap-2 rounded-lg bg-[#F2F2F2] border border-[#E2E2E2] px-3 py-2">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#585858]">IGR guideline value</span>
+                  <span className="font-mono text-xs font-bold text-[#131313]">
+                    ₹{market.guidelineRatePerSqFt.toLocaleString('en-IN')} / sq ft
+                  </span>
+                </div>
+              ) : null}
+
               <p className="text-[11px] text-stone-500">
-                Benchmark based on transacted registry records in {project.location} (Range: ₹{market.minRate.toLocaleString('en-IN')} – ₹{market.maxRate.toLocaleString('en-IN')}).
+                Benchmark based on transacted registry records in {project.location} (Range: ₹{market.minRate.toLocaleString('en-IN')} to ₹{market.maxRate.toLocaleString('en-IN')}).
+                {market.guidelineRatePerSqFt ? ' Stamp duty is charged on the higher of your price and the IGR guideline value.' : ''}
               </p>
             </div>
 

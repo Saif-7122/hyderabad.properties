@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { ViewType } from '@/components/TopBar';
 import { ProjectSafetyItem } from '@/lib/mock-data';
-import { UserPreferences } from '@/app/page';
+import { UserPreferences } from '@/components/AppShell';
 import { PrivacyPledge } from '@/components/PrivacyPledge';
 
 interface BookingViewProps {

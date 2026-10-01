@@ -18,7 +18,7 @@ import {
   Sun
 } from 'lucide-react';
 import { ProjectSafetyItem } from '@/lib/mock-data';
-import { UserPreferences } from '@/app/page';
+import { UserPreferences } from '@/components/AppShell';
 
 interface AdvisorDemoPanelProps {
   isOpen: boolean;
